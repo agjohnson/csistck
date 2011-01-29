@@ -15,7 +15,7 @@ our @EXPORT = qw(
 
     file
     noop
-    mode
+    permission
     pkg
     template
 );
@@ -33,7 +33,7 @@ use Data::Dumper;
 # Exports from other classes
 sub file { Csistck::Test::File::file(@_); }
 sub noop { Csistck::Test::NOOP::noop(@_); }
-sub mode { Csistck::Test::Permission::mode(@_); }
+sub permission { Csistck::Test::Permission::permission(@_); }
 sub pkg { Csistck::Test::Pkg::pkg(@_); }
 sub template { Csistck::Test::Template::template(@_); }
 

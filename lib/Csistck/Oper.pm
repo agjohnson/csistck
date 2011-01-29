@@ -38,7 +38,7 @@ my $Modes = {
 };
 
 # Run mode. Default to passing ok and fail
-my $Mode = FAIL|DIFF|FIX|DEBUG;
+my $Mode = DIFF|FIX;
 
 # Dynamic setup of functions for levels
 for my $level (keys %{$Modes}) {
