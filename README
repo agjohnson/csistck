@@ -1,40 +1,64 @@
-Csistck version 0.01
-====================
+NAME
+    Csistck - Perl extension for blah blah blah
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+SYNOPSIS
+    A simple example of using csistck to create an executable management
+    script:
 
-A README file is required for CPAN modules since CPAN extracts the
-README file from a module distribution so that people browsing the
-archive can use it get an idea of the modules uses. It is usually a
-good idea to provide version information here so that people can
-decide whether fixes for the module are worth downloading.
+        use Csistck;
+    
+        for my $host (qw/a b/) {
+            host $host => role('test');
+        }
 
-INSTALLATION
+        host 'c' => role('test');
+    
+        role 'test' => 
+            template(".files/test.tt", "/tmp/test", { text => "Some text here" }),
+            permission("/tmp/test*", mode => '0777', uid => 100, gid => 100);
+    
+        check;
 
-To install this module type the following:
+    The script can then be called directly, using command line arguements
+    below
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+DESCRIPTION
+    Csistck is a configuration management tool that falls somewhere in
+    between the management tools slack and chef.
 
-DEPENDENCIES
+    The model of csistck is more complex than slack, requiring syntax
+    knowledge of Perl and knowledge of csistck calls. However, having used
+    slack for a short period of time -- and having struggled to adapt
+    slightly more complex usage to slacks's simplistic model -- csistck was
+    designed under a similar philosophy goal to keep usage as simple as
+    possible.
 
-This module requires these other modules and libraries:
+    To say chef is more complex than csistck is a heavy understatement. The
+    model of csistck clearly pulls from chef, however the aim of csistck
+    isn't meant to be a mere port of chef to Perl. Where both chef and
+    csistck aim to provide consistency checks, csistck does not aim to
+    provide the depth of checks and resolution that chef provides.
 
-  blah blah blah
+SCRIPT USAGE
+    The following options are recognized in a csistck based script
 
-COPYRIGHT AND LICENCE
+    --okay  Display okay returns on tests
 
-Put the correct copyright and licence information here.
+    --fail  Display failure returns on tests
 
-Copyright (C) 2011 by A. U. Thor
+    --debug Display debug messages
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.1 or,
-at your option, any later version of Perl 5 you may have available.
+    --diff  Display file diff and test differences
 
+    --fix   Fix differences in files and tests
+
+AUTHOR
+    Anthony Johnson, <anthony@ohess.org>
+
+COPYRIGHT AND LICENSE
+    Copyright (C) 2011 by Anthony Johnson
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself, either Perl version 5.10.1 or, at
+    your option, any later version of Perl 5 you may have available.
 

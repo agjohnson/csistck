@@ -5,7 +5,15 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'Csistck',
     VERSION_FROM      => 'lib/Csistck.pm', # finds $VERSION
-    PREREQ_PM         => {}, # e.g., Module::Name => 1.1
+    PREREQ_PM         => {
+        'Digest::MD5' => 0,
+        'File::Basename' => 0,
+        'File::Copy' => 0,
+        'File::stat' => 0,
+        'Getopt::Long' => 0,
+        'Sys::Hostname' => 0,
+        'Template' => 0
+    }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Csistck.pm', # retrieve abstract from module
        AUTHOR         => 'A. U. Thor <anthony@(none)>') : ()),

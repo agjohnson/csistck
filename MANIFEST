@@ -1,6 +1,13 @@
+.hgignore
 Changes
-Makefile.PL
 MANIFEST
+Makefile.PL
 README
-t/Csistck.t
 lib/Csistck.pm
+lib/Csistck/Oper.pm
+lib/Csistck/Test/File.pm
+lib/Csistck/Test/NOOP.pm
+lib/Csistck/Test/Permission.pm
+lib/Csistck/Test/Pkg.pm
+lib/Csistck/Test/Template.pm
+t/Csistck.t

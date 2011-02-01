@@ -76,6 +76,9 @@ sub role {
 sub check {
     my $hostname = shift // hostname;
 
+    # Get options by command line
+    Csistck::Oper::set_mode_by_cli();
+
     if (defined $Hosts->{$hostname}) {
         for my $require (@{$Hosts->{$hostname}}) {
             &$require();
@@ -95,12 +98,69 @@ Csistck - Perl extension for blah blah blah
 
 =head1 SYNOPSIS
 
-  use Csistck;
-  blah blah blah
+A simple example of using csistck to create an executable management
+script:
+
+    use Csistck;
+    
+    for my $host (qw/a b/) {
+        host $host => role('test');
+    }
+
+    host 'c' => role('test');
+    
+    role 'test' => 
+        template(".files/test.tt", "/tmp/test", { text => "Some text here" }),
+        permission("/tmp/test*", mode => '0777', uid => 100, gid => 100);
+    
+    check;
+
+The script can then be called directly, using command line arguements below
 
 =head1 DESCRIPTION
 
-Blah blah blah.
+Csistck is a configuration management tool that falls somewhere in between
+the management tools slack and chef.
+
+The model of csistck is more complex than slack, requiring syntax knowledge 
+of Perl and knowledge of csistck calls. However, having used slack for a 
+short period of time -- and having struggled to adapt slightly more complex
+usage to slacks's simplistic model -- csistck was designed under a similar
+philosophy goal to keep usage as simple as possible.
+
+To say chef is more complex than csistck is a heavy understatement. The model
+of csistck clearly pulls from chef, however the aim of csistck isn't meant to be
+a mere port of chef to Perl. Where both chef and csistck aim to provide
+consistency checks, csistck does not aim to provide the depth of checks 
+and resolution that chef provides. 
+
+=head1 SCRIPT USAGE
+
+The following options are recognized in a csistck based script
+
+=over 8
+
+=item B<--okay>
+
+Display okay returns on tests
+
+=item B<--fail>
+
+Display failure returns on tests
+
+=item B<--debug>
+
+Display debug messages
+
+=item B<--diff>
+
+Display file diff and test differences
+
+=item B<--fix>
+
+Fix differences in files and tests
+
+=back
 
 =head1 AUTHOR
 

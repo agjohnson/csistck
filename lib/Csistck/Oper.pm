@@ -20,6 +20,7 @@ our @EXPORT = qw/
 /;
 
 use Carp;
+use Getopt::Long;
 
 # Run mode levels
 use constant OKAY => 1;   
@@ -38,7 +39,7 @@ my $Modes = {
 };
 
 # Run mode. Default to passing ok and fail
-my $Mode = DIFF|FIX;
+my $Mode = 0;
 
 # Dynamic setup of functions for levels
 for my $level (keys %{$Modes}) {
@@ -65,6 +66,20 @@ for my $level (keys %{$Modes}) {
     };
 }
 
+
+# Set up mode via command line options
+sub set_mode_by_cli {
+    my $levels = { map { $_ => 0 } keys %{$Modes} }; 
+
+    my %opts = map { $_ => \$levels->{$_} } keys %{$Modes};
+    my $result = GetOptions( %opts );
+
+    # Iterate through options, bitwise OR values
+    for my $lvl (keys %{$Modes}) {
+        $Mode |= $Modes->{$lvl}
+          if ($levels->{$lvl});
+    }
+}
 
 sub log_message {
     my $level = shift;
