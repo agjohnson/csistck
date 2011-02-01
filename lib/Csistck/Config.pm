@@ -5,13 +5,13 @@ use strict;
 use warnings;
 
 use base 'Exporter';
-our @EXPORT = qw(option);
+our @EXPORT_OK = qw(option);
 
 # Configuration options
 my $Config = { };
 
 sub option {
-    my ($class, $key, $value) = @_;
+    my ($key, $value) = @_;
 
     # No key?
     return 0

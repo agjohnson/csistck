@@ -22,7 +22,7 @@ our @EXPORT = qw(
 );
 
 # Imports for base
-use Csistck::Config;
+use Csistck::Config qw/option/;
 use Csistck::Test::NOOP;
 use Csistck::Test::File;
 use Csistck::Test::Permission;
@@ -33,7 +33,6 @@ use Sys::Hostname;
 use Data::Dumper;
 
 # Exports from other classes
-sub option { Csistck::Config::option(@_); }
 sub file { Csistck::Test::File::file(@_); }
 sub noop { Csistck::Test::NOOP::noop(@_); }
 sub permission { Csistck::Test::Permission::permission(@_); }
