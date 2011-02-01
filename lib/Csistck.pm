@@ -12,6 +12,7 @@ our @EXPORT = qw(
     host
     role
     check
+    option
 
     file
     noop
@@ -21,6 +22,7 @@ our @EXPORT = qw(
 );
 
 # Imports for base
+use Csistck::Config;
 use Csistck::Test::NOOP;
 use Csistck::Test::File;
 use Csistck::Test::Permission;
@@ -31,6 +33,7 @@ use Sys::Hostname;
 use Data::Dumper;
 
 # Exports from other classes
+sub option { Csistck::Config::option(@_); }
 sub file { Csistck::Test::File::file(@_); }
 sub noop { Csistck::Test::NOOP::noop(@_); }
 sub permission { Csistck::Test::Permission::permission(@_); }
@@ -44,6 +47,11 @@ my $Roles = {};
 
 sub host {
     my $hostname = shift;
+
+    # Add domain if option is set?
+    my $domain_name = Csistck::Config::option('domain_name');
+    $hostname = join '.', $hostname, $domain_name
+      if (defined $domain_name);
 
     while (my $require = shift) {
         push(@{$Hosts->{$hostname}}, $require);
