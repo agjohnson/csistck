@@ -23,7 +23,7 @@ sub template_process {
     # Add arguments, process template
     my $tplout;
     my $args_add = {
-        hostnamme => hostname,
+        hostname => hostname,
         $args
     };
     template_file($template, \$tplout, $args_add);
