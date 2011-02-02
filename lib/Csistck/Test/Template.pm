@@ -12,7 +12,7 @@ use Sys::Hostname;
 sub template {
     my $template = shift;
     my $dest = shift;
-    my $args = shift;
+    my $args = shift // {};
 
     return sub { template_process($template, $dest, $args); };
 }
@@ -24,7 +24,7 @@ sub template_process {
     my $tplout;
     my $args_add = {
         hostname => hostname,
-        $args
+        %{$args}
     };
     template_file($template, \$tplout, $args_add);
     
@@ -37,7 +37,7 @@ sub template_process {
     else {
         fail(sprintf "Template %s doesn't match %s", $template, $dest);
         if (fix()) {
-            template_install($template, $dest, $args);
+            template_install($template, $dest, $args_add);
         }
     } 
 }
