@@ -25,45 +25,64 @@ sub pkg {
     return sub {
         my $ret = MISSING;
 
-        # Given package type, run command
-        given ($type) {
-            when ("pacman") { $ret = check_pacman($pkg); };
-            when ("dpkg") { $ret = check_dpkg($pkg); };
-        }
-
-        if ($ret == EXISTS) {
-            okay(sprintf "Package %s found, using %s", $pkg, $type);
+        if (pkg_check($pkg, $type) == EXISTS) {
+            return okay(sprintf "Package %s found, using %s", $pkg, $type);
         }
         else {
             fail(sprintf "Package %s not found, using %s", $pkg, $type);
+            pkg_install($pkg, $type) if (fix() or diff());
+            return 0;
         }
     }
 }
 
-sub check_pacman {
-    my $pkg = shift;
+sub pkg_check {
+    my ($pkg, $type) = @_;
+    my $cmd = "";
+
+    # Test package name
+    return fail('Invalid package name')
+      unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
+
+    # Decide command, execute. Return MISSING by default
+    given ($type) {
+        when ('dpkg') { $cmd = "dpkg -L \"$pkg\""; };
+        when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
+    }
     
-    if($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/) {
-        my $ret = system("pacman -Qe $pkg &>/dev/null");
-        if ($ret == 0) {
-            return EXISTS;
-        }
+    my $ret = system("$cmd &>/dev/null");
+    if ($ret == 0) {
+        return EXISTS;
     }
 
     return MISSING;
 }
 
-sub check_dpkg {
-    my $pkg = shift;
+# Package install
+sub pkg_install {
+    my ($pkg, $type) = @_;
+    my $cmd = "";
+    
+    # Test package name
+    return fail('Invalid package name')
+      unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
+    
+    given ($type) {
+        when ("dpkg") { $cmd = "apt-get -qq -y install \"$pkg\""; };
+        when ("pacman") { $cmd = "pacman -Sq --noconfirm \"$pkg\""; };
+    }
+    
+    diff("Install package via command: $cmd");
 
-    if($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/) {
-        my $ret = system("dpkg -L $pkg &>/dev/null");
+    if (fix()) {
+        my $ret = system("$cmd &>/dev/null");
         if ($ret == 0) {
-            return EXISTS;
+            return okay("Package $pkg installed");
+        }
+        else {
+            return fail("Package $pkg installation failed");
         }
     }
-
-    return MISSING;
 }
 
 1;
