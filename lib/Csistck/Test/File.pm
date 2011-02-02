@@ -56,27 +56,19 @@ sub file_install {
     return
 }
 
-# Compare all files
+# Compare hashes between two files
 sub file_compare {
     my @files = @_;
-    my $hash = undef;
+
+    # Require two files
+    return 0 unless (scalar @files == 2);
+
+    # Get hashes and return compare
+    my ($hasha, $hashb) = map file_hash($_), @files;
+
+    debug(sprintf "File compare result: <hash=%s> <hash=%s>", $hasha, $hashb);
     
-    for my $file (@files) {
-        # Get file hash, debug
-        my $hashret = file_hash($file);
-        return 0 if (!defined $hashret);
-
-        # If hash has been defined already, compare hash and hashret
-        # If not, set it. This is the first file
-        if (defined($hash)) {
-            return 0 if (!$hashret eq $hash);
-        }
-        else {
-            $hash = $hashret if (!defined($hash));
-        }
-    }
-
-    return 1;
+    return ($hasha eq $hashb);
 }
 
 sub file_hash {
@@ -89,12 +81,13 @@ sub file_hash {
         $hash->addfile($h);
         close($h);
 
-        debug(sprintf "<file=%s> <hash=%s>: File hash successful", $file, $hash->hexdigest());
-        return $hash->hexdigest();
+        my $digest = $hash->hexdigest();
+        debug(sprintf "<file=%s> <hash=%s>: File hash successful", $file, $digest);
+        return $digest;
     }
 
     debug(sprintf "<file=%s>: File hash failed", $file);
-    return undef;
+    return 0;
 }
 
 1;
