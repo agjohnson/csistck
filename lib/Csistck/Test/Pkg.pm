@@ -57,7 +57,7 @@ sub check_dpkg {
     my $pkg = shift;
 
     if($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/) {
-        my $ret = system("dpkg -l $pkg &>/dev/null");
+        my $ret = system("dpkg -L $pkg &>/dev/null");
         if ($ret == 0) {
             return EXISTS;
         }
