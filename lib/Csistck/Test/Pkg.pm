@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use Csistck::Oper;
+use Csistck::Config qw/option/;
 
 # Package command return
 use constant EXISTS => 1;
@@ -15,7 +16,11 @@ use File::Basename;
 
 sub pkg {
     my $pkg = shift;
-    my $type = shift // "dpkg";
+    my $type = shift;
+
+    # Default package type
+    $type = option('pkg_type') // 'dpkg'
+      unless (defined $type);
 
     return sub {
         my $ret = MISSING;
