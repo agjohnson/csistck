@@ -28,6 +28,7 @@ sub pkg {
         # Given package type, run command
         given ($type) {
             when ("pacman") { $ret = check_pacman($pkg); };
+            when ("dpkg") { $ret = check_dpkg($pkg); };
         }
 
         if ($ret == EXISTS) {
