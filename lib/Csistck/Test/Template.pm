@@ -7,7 +7,7 @@ use warnings;
 use Csistck::Oper;
 use Template;
 use File::Copy;
-use Data::Dumper;
+use Sys::Hostname;
 
 sub template {
     my $template = shift;
@@ -20,9 +20,13 @@ sub template {
 sub template_process {
     my ($template, $dest, $args) = @_;
 
-    # Process template and output to reference
+    # Add arguments, process template
     my $tplout;
-    template_file($template, \$tplout, $args);
+    my $args_add = {
+        hostnamme => hostname,
+        $args
+    };
+    template_file($template, \$tplout, $args_add);
     
     my $hashsrc = string_hash($tplout);
     my $hashdst = file_hash($dest);
