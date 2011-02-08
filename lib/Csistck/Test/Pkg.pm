@@ -78,7 +78,7 @@ sub pkg_install {
     diff("Install package via command: $cmd");
 
     if (fix()) {
-        my $ret = system("$cmd &>/dev/null");
+        my $ret = system("$cmd 1>/dev/null 2>/dev/null");
         if ($ret == 0) {
             return okay("Package $pkg installed");
         }

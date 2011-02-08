@@ -39,7 +39,7 @@ sub template_process {
     }
     else {
         fail(sprintf "Template %s doesn't match %s", $template, $dest);
-        if (fix()) {
+        if (fix() or diff()) {
             template_install($template, $dest, $args_add);
         }
     } 
@@ -49,6 +49,9 @@ sub template_install {
     my ($template, $dest, $args) = @_;
 
     diff("Output template <template=$template> <dest=$dest>");
+    
+    return 1
+      unless (fix());
 
     if (-f -w $dest) {
         open(my $h, '>', $dest);
