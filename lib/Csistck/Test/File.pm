@@ -11,6 +11,7 @@ use Csistck::Oper;
 use Digest::MD5;
 use File::Basename;
 use File::Copy;
+use FindBin;
 
 sub file {
     my $src = shift;
@@ -32,19 +33,19 @@ sub file_process {
     if (! -d -w $dest) {
         return fail("dest path $dest does not exist or is not a path");
     }
-    
-    # Fist get the basename, so we can add to the dest path
+
+    # Get absolute source and desination
+    my $file_src = join '/', $FindBin::Bin, $file;
     my $file_base = basename($file);
     my $file_dest = join "/", $dest, $file_base;
 
-        
-    if (file_compare($file, $file_dest)) {
-        return okay(sprintf "File %s matches %s", $file, $file_dest);
+    if (file_compare($file_src, $file_dest)) {
+        return okay(sprintf "File %s matches %s", $file_src, $file_dest);
     }
     else {
         # Fail with message, then try to fix it.
-        fail(sprintf "File %s doesn't match %s", $file, $file_dest);
-        file_install($file, $file_dest) if (fix() or diff()); 
+        fail(sprintf "File %s doesn't match %s", $file_src, $file_dest);
+        file_install($file_src, $file_dest) if (fix() or diff()); 
         return
     }
 }
