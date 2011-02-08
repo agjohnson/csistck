@@ -23,22 +23,14 @@ our @EXPORT = qw(
 
 # Imports for base
 use Csistck::Config qw/option/;
-use Csistck::Test::NOOP;
-use Csistck::Test::File;
-use Csistck::Test::Permission;
-use Csistck::Test::Pkg;
-use Csistck::Test::Template;
+use Csistck::Test::NOOP qw/noop/;
+use Csistck::Test::File qw/file/;
+use Csistck::Test::Permission qw/permission/;
+use Csistck::Test::Pkg qw/pkg/;
+use Csistck::Test::Template qw/template/;
 
 use Sys::Hostname;
 use Data::Dumper;
-
-# Exports from other classes
-sub file { Csistck::Test::File::file(@_); }
-sub noop { Csistck::Test::NOOP::noop(@_); }
-sub permission { Csistck::Test::Permission::permission(@_); }
-sub pkg { Csistck::Test::Pkg::pkg(@_); }
-sub template { Csistck::Test::Template::template(@_); }
-
 
 # Package wide
 my $Hosts = {};

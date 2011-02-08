@@ -4,6 +4,9 @@ use 5.010;
 use strict;
 use warnings;
 
+use base 'Exporter';
+our @EXPORT_OK = qw/template/;
+
 use Csistck::Oper;
 use Template;
 use File::Copy;

@@ -4,6 +4,9 @@ use 5.010;
 use strict;
 use warnings;
 
+use base 'Exporter';
+our @EXPORT_OK = qw/pkg/;
+
 use Csistck::Oper;
 use Csistck::Config qw/option/;
 
@@ -46,7 +49,7 @@ sub pkg_check {
 
     # Decide command, execute. Return MISSING by default
     given ($type) {
-        when ('dpkg') { $cmd = "dpkg -L \"$pkg\""; };
+        when ('dpkg') { $cmd = "dpkg -s \"$pkg\""; };
         when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
     }
     

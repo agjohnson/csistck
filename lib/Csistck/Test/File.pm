@@ -4,6 +4,9 @@ use 5.010;
 use strict;
 use warnings;
 
+use base 'Exporter';
+our @EXPORT_OK = qw/file/;
+
 use Csistck::Oper;
 use Digest::MD5;
 use File::Basename;
