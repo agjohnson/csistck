@@ -49,10 +49,7 @@ sub pkg_check {
 
     # Decide command, execute. Return MISSING by default
     given ($type) {
-        when ('dpkg') { 
-            $ENV{DEBIAN_FRONTEND} = "noninteractive";
-            $cmd = "dpkg -L \"$pkg\""; 
-        }
+        when ('dpkg') { $cmd = "dpkg -L \"$pkg\""; };
         when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
     }
     
@@ -74,7 +71,10 @@ sub pkg_install {
       unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
     
     given ($type) {
-        when ("dpkg") { $cmd = "apt-get -qq -y install \"$pkg\""; };
+        when ("dpkg") { 
+            $ENV{DEBIAN_FRONTEND} = "noninteractive";
+            $cmd = "apt-get -qq -y install \"$pkg\""; 
+        }
         when ("pacman") { $cmd = "pacman -Sq --noconfirm \"$pkg\""; };
     }
     
