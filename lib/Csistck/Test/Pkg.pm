@@ -49,7 +49,10 @@ sub pkg_check {
 
     # Decide command, execute. Return MISSING by default
     given ($type) {
-        when ('dpkg') { $cmd = "dpkg -L \"$pkg\""; };
+        when ('dpkg') { 
+            $ENV{DEBIAN_FRONTEND} = "noninteractive";
+            $cmd = "dpkg -L \"$pkg\""; 
+        }
         when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
     }
     
