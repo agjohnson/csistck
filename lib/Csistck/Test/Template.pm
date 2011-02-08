@@ -53,6 +53,8 @@ sub template_install {
 
     diff("Output template <template=$template> <dest=$dest>");
     
+    return unless (fix());
+
     if (-e $dest) {
         # Exists, but is a directory
         return fail("Destination $dest exists and is not a file")
