@@ -11,6 +11,7 @@ use Csistck::Oper;
 use Template;
 use File::Copy;
 use Sys::Hostname;
+use FindBin;
 
 sub template {
     my $template = shift;
@@ -24,23 +25,25 @@ sub template_process {
     my ($template, $dest, $args) = @_;
 
     # Add arguments, process template
+    my $template_path = join "/", $FindBin::Bin, $template;
     my $tplout;
     my $args_add = {
         hostname => hostname,
         %{$args}
     };
-    template_file($template, \$tplout, $args_add);
+    template_file($template_path, \$tplout, $args_add)
+      or fail("Template file $template_path not processed");
     
     my $hashsrc = string_hash($tplout);
     my $hashdst = file_hash($dest);
 
     if (defined $hashsrc and defined $hashdst and ($hashsrc eq $hashdst)) {
-        return okay(sprintf "Template %s matches %s", $template, $dest);
+        return okay(sprintf "Template %s matches %s", $template_path, $dest);
     }
     else {
-        fail(sprintf "Template %s doesn't match %s", $template, $dest);
+        fail(sprintf "Template %s doesn't match %s", $template_path, $dest);
         if (fix() or diff()) {
-            template_install($template, $dest, $args_add);
+            template_install($template_path, $dest, $args_add);
         }
     } 
 }
@@ -50,17 +53,19 @@ sub template_install {
 
     diff("Output template <template=$template> <dest=$dest>");
     
-    return 1
-      unless (fix());
+    if (-e $dest) {
+        # Exists, but is a directory
+        return fail("Destination $dest exists and is not a file")
+          if (-d $dest);
+        # Exists but isn't writable
+        return fail("Destination $dest exists is is not writable")
+          if (-f $dest and ! -w $dest);
+    }
 
-    if (-f -w $dest) {
-        open(my $h, '>', $dest);
-        template_file($template, $h, $args);
-        close($h);
-    }
-    else {
-        fail("Destination $dest is not writable or is not a file.");
-    }
+
+    open(my $h, '>', $dest) or die("Permission denied writing template");
+    template_file($template, $h, $args);
+    close($h);
 }
 
 sub template_file {
@@ -70,15 +75,15 @@ sub template_file {
     
     # Create Template object, no config for now
     my $t = Template->new();
-    my $output = "";
     
     if (-r $file) {
         open(my $h, $file);
         $t->process($h, $args, $out) or die $t->error();
         close($h);
+        return 1;
     }
 
-    return $output;
+    return 0;
 }
 
 sub string_hash {
