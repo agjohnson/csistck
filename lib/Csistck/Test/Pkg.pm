@@ -53,7 +53,7 @@ sub pkg_check {
         when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
     }
     
-    my $ret = system("$cmd &>/dev/null");
+    my $ret = system("$cmd 1>/dev/null 2>/dev/null");
     if ($ret == 0) {
         return EXISTS;
     }
