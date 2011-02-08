@@ -49,7 +49,7 @@ sub pkg_check {
 
     # Decide command, execute. Return MISSING by default
     given ($type) {
-        when ('dpkg') { $cmd = "dpkg -s \"$pkg\""; };
+        when ('dpkg') { $cmd = "dpkg -L \"$pkg\""; };
         when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
     }
     
