@@ -48,14 +48,6 @@ sub file_check {
     my $src = shift;
     my $dest = shift;
 
-    # Make sure dest is a path
-    #die("Destination path does not exist")
-    #  if (! -e $dest);
-    #die("Destination path is not a path")
-    #  if (! -d $dest);
-    #die("Destination path is not writable")
-    #  if (-d $dest and ! -w $dest);
-    
     die("Files do not match")
       unless(file_compare($src, $dest));
 }
