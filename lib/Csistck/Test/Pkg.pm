@@ -7,12 +7,9 @@ use warnings;
 use base 'Exporter';
 our @EXPORT_OK = qw/pkg/;
 
-use Csistck::Oper;
+use Csistck::Oper qw/debug/;
 use Csistck::Config qw/option/;
-
-# Package command return
-use constant EXISTS => 1;
-use constant MISSING => 0;
+use Csistck::Test;
 
 use Digest::MD5;
 use File::Basename;
@@ -25,18 +22,11 @@ sub pkg {
     $type = option('pkg_type') // 'dpkg'
       unless (defined $type);
 
-    return sub {
-        my $ret = MISSING;
-
-        if (pkg_check($pkg, $type) == EXISTS) {
-            return okay(sprintf "Package %s found, using %s", $pkg, $type);
-        }
-        else {
-            fail(sprintf "Package %s not found, using %s", $pkg, $type);
-            pkg_install($pkg, $type) if (fix() or diff());
-            return 0;
-        }
-    }
+    return Csistck::Test->new(
+        sub { pkg_check($pkg, $type); },
+        sub { pkg_install($pkg, $type); },
+        "Searching for package $pkg, using $type"
+    );
 }
 
 sub pkg_check {
@@ -44,21 +34,21 @@ sub pkg_check {
     my $cmd = "";
 
     # Test package name
-    return fail('Invalid package name')
+    die('Invalid package name')
       unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
 
-    # Decide command, execute. Return MISSING by default
+    # Decide command, execute. Die on failure
     given ($type) {
         when ('dpkg') { $cmd = "dpkg -L \"$pkg\""; };
         when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
     }
     
+    debug("Searching for package via command: $cmd");
+    
     my $ret = system("$cmd 1>/dev/null 2>/dev/null");
-    if ($ret == 0) {
-        return EXISTS;
-    }
 
-    return MISSING;
+    die("Package missing")
+      unless($ret == 0);
 }
 
 # Package install
@@ -67,7 +57,7 @@ sub pkg_install {
     my $cmd = "";
     
     # Test package name
-    return fail('Invalid package name')
+    die('Invalid package name')
       unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
     
     given ($type) {
@@ -78,17 +68,12 @@ sub pkg_install {
         when ("pacman") { $cmd = "pacman -Sq --noconfirm \"$pkg\""; };
     }
     
-    diff("Install package via command: $cmd");
+    debug("Installing package via command: $cmd");
 
-    if (fix()) {
-        my $ret = system("$cmd 1>/dev/null 2>/dev/null");
-        if ($ret == 0) {
-            return okay("Package $pkg installed");
-        }
-        else {
-            return fail("Package $pkg installation failed");
-        }
-    }
+    my $ret = system("$cmd 1>/dev/null 2>/dev/null");
+
+    die("Package installation failed")
+      unless ($ret == 0);
 }
 
 1;

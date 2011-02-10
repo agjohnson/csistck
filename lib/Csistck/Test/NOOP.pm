@@ -8,12 +8,13 @@ use base 'Exporter';
 our @EXPORT_OK = qw/noop/;
 
 use Csistck::Oper;
-use Data::Dumper;
+use Csistck::Test;
 
 sub noop {
     my $args = shift;
     my $result = undef;
 
+    # Set result
     if (ref $args eq "HASH") {
         if (defined $args->{result}) {
             $result = $args->{result};
@@ -23,14 +24,17 @@ sub noop {
         $result = $args;
     }
 
-    return sub {
-        if ($result) {
-            okay("NOOP passes");
-        }
-        else {
-            fail("NOOP failed");
-        }
-    };
+    return Csistck::Test->new(
+        sub { noop_check($result); },
+        sub { noop_check($result); },
+        "NOOP test"
+    );
+}
+
+sub noop_check {
+    my $result = shift;
+
+    die("Set to failure") unless ($result);
 }
 
 1;
