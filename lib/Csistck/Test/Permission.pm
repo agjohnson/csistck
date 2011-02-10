@@ -7,7 +7,9 @@ use warnings;
 use base 'Exporter';
 our @EXPORT_OK = qw/permission/;
 
-use Csistck::Oper;
+use Csistck::Oper qw/debug/;
+use Csistck::Test;
+
 use File::stat;
 
 # Input is src (glob as string), and assoc. array of permisison checks
@@ -17,9 +19,24 @@ sub permission {
 
     # Get glob of files
     my @files = glob($src);
+     
+    # Return array of tests
+    return map { permission_build_test($src, \%args); } @files;
+}
+
+# Helper function to avoid same scope in map and to build test
+sub permission_build_test {
+    my ($src, $args) = @_;
     
-    # Depending on mode
-    return sub { for my $file (@files) { permission_process($file, \%args); }; };
+    # Bad arguments
+    die("Invalid arguments")
+     if (!defined $args or !ref $args eq "HASH");
+    
+    return Csistck::Test->new(
+        sub { permission_process($src, $args); },
+        sub { permission_process($src, $args); },
+        "Permission check on $_"
+    );
 }
 
 # First is file, second call is hash of args
@@ -28,14 +45,8 @@ sub permission_process {
     my $args = shift;
 
     # Make sure dest is a path
-    if (! -e $file) {
-        return fail("Path/file $file does not exist");
-    }
-    
-    # Bad arguments
-    if (!defined $args or !ref $args eq "HASH") {
-        return fail("Invalid arguments");
-    }
+    die("Path not found")
+      if (! -e $file);
     
     # Run tests with arguments
     # Check for mode
@@ -59,56 +70,35 @@ sub mode_process {
     my ($file, $mode) = @_;
 
     # Check mode is legit
-    if ($mode !~ m/^[0-7]{3,4}$/) {
-        return fail("Invalid file mode");
-    }
-    
-    if (mode_compare($file, $mode)) {
-        return okay("File mode of $file matches mode $mode");
-    }
-    else {
-        fail("File mode of $file does not match mode $mode");
-        mode_repair($file, $mode) if (fix or diff);
-        return
-    }
+    die("Invalid file mode")
+      if ($mode !~ m/^[0-7]{3,4}$/);
+
+    die("File mode does not match")
+      unless (mode_compare($file, $mode));
 }
 
 sub uid_process {
     my ($file, $uid) = @_;
 
     # Check uid is legit
-    if ($uid !~ m/^[0-9]+$/) {
-        return fail("Invalid user id");
-    }
+    die("Invalid user id")
+      if ($uid !~ m/^[0-9]+$/);
 
     # Run check, repair if fixing
-    if (uid_compare($file, $uid)) {
-        return okay("File user id of $file matches mode $uid");
-    }
-    else {
-        fail("File user id of $file does not match mode $uid");
-        uid_repair($file, $uid) if (fix or diff);
-        return
-    }
+    die("File uid does not match")
+      unless (uid_compare($file, $uid));
 }
 
 sub gid_process {
     my ($file, $gid) = @_;
 
     # Check gid is legit
-    if ($gid !~ m/^[0-9]+$/) {
-        return fail("Invalid group id");
-    }
+    die("Invalid group id")
+      if ($gid !~ m/^[0-9]+$/);
 
     # Run check, repair if fixing
-    if (gid_compare($file, $gid)) {
-        return okay("File group id of $file matches mode $gid");
-    }
-    else {
-        fail("File group id of $file does not match mode $gid");
-        gid_repair($file, $gid) if (fix or diff);
-        return
-    }
+    die("File gid does not match")
+      unless (gid_compare($file, $gid));
 }
 
 # Compare all files
@@ -133,7 +123,7 @@ sub mode_compare {
 sub mode_repair {
     my ($file, $mode) = @_;
 
-    diff("Chmod file: <file=$file> <mode=$mode>");
+    debug("Chmod file: <file=$file> <mode=$mode>");
     
     chmod(oct($mode), $file) or die("Failed to chmod file: $file") if (fix());
 
@@ -159,7 +149,7 @@ sub uid_compare {
 sub uid_repair {
     my ($file, $uid) = @_;
 
-    diff("Chown file: <file=$file> <uid=$uid>");
+    debug("Chown file: <file=$file> <uid=$uid>");
     
     chown($uid, -1, $file) or die("Failed to chown file: $file") if (fix());
 
@@ -185,7 +175,7 @@ sub gid_compare {
 sub gid_repair {
     my ($file, $gid) = @_;
 
-    diff("Chown file: <file=$file> <gid=$gid>");
+    debug("Chown file: <file=$file> <gid=$gid>");
     
     chown(-1, $gid, $file) or die("Failed to chown file: $file") if (fix());
 

@@ -24,8 +24,8 @@ our @EXPORT = qw(
 # Imports for base
 use Csistck::Config qw/option/;
 use Csistck::Test::NOOP qw/noop/;
-#use Csistck::Test::File qw/file/;
-#use Csistck::Test::Permission qw/permission/;
+use Csistck::Test::File qw/file/;
+use Csistck::Test::Permission qw/permission/;
 use Csistck::Test::Pkg qw/pkg/;
 use Csistck::Test::Template qw/template/;
 
@@ -83,9 +83,12 @@ sub check {
             # Check and repair if we have a Test object
             die("Not a Csistck::Test")
               unless (ref $require eq "Csistck::Test");
-
-            $require->check() if (Csistck::Oper::check());
-            $require->repair() if (Csistck::Oper::repair());
+           
+            # Check is mandatory, repair if check is bad and we're repairing
+            if (!$require->check()) {
+                $require->repair() 
+                  if (Csistck::Oper::repair());
+            }
         }
     }
     else {
