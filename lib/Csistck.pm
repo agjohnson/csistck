@@ -27,7 +27,7 @@ use Csistck::Test::NOOP qw/noop/;
 #use Csistck::Test::File qw/file/;
 #use Csistck::Test::Permission qw/permission/;
 use Csistck::Test::Pkg qw/pkg/;
-#use Csistck::Test::Template qw/template/;
+use Csistck::Test::Template qw/template/;
 
 use Sys::Hostname;
 use Data::Dumper;
