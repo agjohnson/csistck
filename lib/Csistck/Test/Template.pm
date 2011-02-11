@@ -30,9 +30,15 @@ sub template {
     # Get full template path, return Test
     my $abs_tpl = get_absolute_template($template);
 
+    # Add automatic arguments
+    my $args_add = {
+        hostname => hostname,
+        %{$args}
+    };
+
     return Csistck::Test->new(
-      sub { template_check($abs_tpl, $dest, $args); },
-      sub { template_install($abs_tpl, $dest, $args); },
+      sub { template_check($abs_tpl, $dest, $args_add); },
+      sub { template_install($abs_tpl, $dest, $args_add); },
       "Process template $template for destination $dest"
     );
 }
@@ -40,12 +46,8 @@ sub template {
 sub template_check {
     my ($template, $dest, $args) = @_;
     my $tplout;
-    my $args_add = {
-        hostname => hostname,
-        %{$args}
-    };
 
-    template_file($template, \$tplout, $args_add)
+    template_file($template, \$tplout, $args)
       or die("Template file $template not processed");
     
     my $hashsrc = hash_string($tplout);
@@ -69,7 +71,6 @@ sub template_install {
     # Backup file
     backup_file($dest)
       if (-f -e -r $dest);
-
 
     debug("Output template <template=$template> <dest=$dest>");
 
