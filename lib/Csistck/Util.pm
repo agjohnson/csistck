@@ -25,6 +25,10 @@ sub backup_file {
     
     # Get absolute backup path
     my $dest_base = option('backup_path') // join '/', $FindBin::Bin, 'backup';
+    die("Backup path does not exist")
+      if (! -e $dest_base);
+    die("Backup path is not writable")
+      if (-e $dest_base and ! -w $dest_base);    
     
     # Get file hash, use this is a file name to copy to
     my $hash = hash_file($file);
