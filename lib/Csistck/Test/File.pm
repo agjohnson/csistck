@@ -20,8 +20,9 @@ sub file {
     my $dest = shift;
     my $args = shift;
 
-    # Get glob of files
-    my @files = glob($src);
+    # Get absolute paths for glob, glob files
+    my $src_abs = join '/', $FindBin::Bin, $src;
+    my @files = glob($src_abs);
     
     # Return array of tests
     return map { file_build_test($_, $dest); } @files;
@@ -31,15 +32,14 @@ sub file {
 sub file_build_test {
     my ($src, $dest) = @_;
     
-    # Get absolute paths
-    my $src_abs = join '/', $FindBin::Bin, $src;
+    # Test destination for file
     my $src_base = basename($src);
     my $dest_abs = join "/", $dest, $src_base;
-    
+
     return Csistck::Test->new(
-        sub { file_check($src_abs, $dest_abs); },
-        sub { file_install($src_abs, $dest_abs); },
-        "File check on $src_abs"
+        sub { file_check($src, $dest_abs); },
+        sub { file_install($src, $dest_abs); },
+        "File check on $src"
     );
 }
 
