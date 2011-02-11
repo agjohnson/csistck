@@ -36,6 +36,8 @@ use Data::Dumper;
 my $Hosts = {};
 my $Roles = {};
 
+# Add obj to host array. Tests are Csistck::Test blessed references and
+# roles are code references.
 sub host {
     my $hostname = shift;
 
@@ -51,6 +53,7 @@ sub host {
     return $Hosts->{$hostname};
 }
 
+# Define/reference role and define subrole code ref or Csistck::Test
 sub role {
     my $role = shift;
 
@@ -61,38 +64,49 @@ sub role {
 
     return sub { 
         # Run required role or die
-        if(defined $Roles->{$role}) {
-            for my $require (@{$Roles->{$role}}) {
-                &$require();
-            }
-        }
-        else {
-            die ("What's this, \"${role}\"? That role is bupkis.");
-        }
+        die ("What's this, \"${role}\"? That role is bupkis.")
+          unless (defined $Roles->{$role});
+        
+        process($Roles->{$role});
     }
 }
 
+# Main call to start processing
 sub check {
     my $hostname = shift // hostname;
 
     # Get options by command line
     Csistck::Oper::set_mode_by_cli();
 
-    if (defined $Hosts->{$hostname}) {
-        for my $require (@{$Hosts->{$hostname}}) {
-            # Check and repair if we have a Test object
-            die("Not a Csistck::Test")
-              unless (ref $require eq "Csistck::Test");
-           
+    die ("What's this, \"${hostname}\"? That host is bupkis.")
+      unless (defined $Hosts->{$hostname});
+
+    process($Hosts->{$hostname});
+}
+
+# For recursive testing based on type
+sub process {
+    my $obj = shift;
+    
+    # Iterate through array and recursively call process, call code refs, 
+    # and run tests 
+    given (ref $obj) {
+        when ("ARRAY") {
+            foreach my $subobj (@{$obj}) {
+                process($subobj);
+            }
+        }
+        when ("CODE") {
+            &{$obj};
+        }
+        when ("Csistck::Test") {
             # Check is mandatory, repair if check is bad and we're repairing
-            if (!$require->check()) {
-                $require->repair() 
+            if (!$obj->check()) {
+                $obj->repair()
                   if (Csistck::Oper::repair());
             }
         }
-    }
-    else {
-        die ("What's this, \"${hostname}\"? That host is bupkis.");
+        default { die(sprintf("Unkown object reference: ", ref $obj)); }
     }
 }
 
@@ -100,6 +114,7 @@ sub check {
 __END__
 
 =head1 NAME
+
 
 Csistck - Perl extension for blah blah blah
 
