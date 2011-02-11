@@ -8,6 +8,7 @@ use base 'Exporter';
 our @EXPORT_OK = qw/template/;
 
 use Csistck::Oper qw/debug/;
+use Csistck::Util qw/backup_file hash_file hash_string/;
 use Csistck::Test;
 
 use Template;
@@ -47,8 +48,8 @@ sub template_check {
     template_file($template, \$tplout, $args_add)
       or die("Template file $template not processed");
     
-    my $hashsrc = string_hash($tplout);
-    my $hashdst = file_hash($dest);
+    my $hashsrc = hash_string($tplout);
+    my $hashdst = hash_file($dest);
     
     die("Template output does not match destination")
       unless(defined $hashsrc and defined $hashdst and ($hashsrc eq $hashdst));
@@ -57,17 +58,20 @@ sub template_check {
 sub template_install {
     my ($template, $dest, $args) = @_;
 
-    debug("Output template <template=$template> <dest=$dest>");
-    
     # Try to catch some errors
     if (-e $dest) {
-        # Exists, but is a directory
         die("Destination $dest exists and is not a file")
           if (-d $dest);
-        # Exists but isn't writable
         die("Destination $dest exists is is not writable")
           if (-f $dest and ! -w $dest);
     }
+        
+    # Backup file
+    backup_file($dest)
+      if (-f -e -r $dest);
+
+
+    debug("Output template <template=$template> <dest=$dest>");
 
     open(my $h, '>', $dest) 
       or die("Permission denied writing template");
@@ -101,34 +105,6 @@ sub get_absolute_template {
     my $template = shift;
 
     return join "/", $FindBin::Bin, $template;
-}
-
-# Returns md5 hash of input string
-sub string_hash {
-    my $string = shift;
-
-    my $hash = Digest::MD5->new();
-    $hash->add($string);
-
-    return $hash->hexdigest();
-}
-
-# Returns md5 hash of file
-sub file_hash {
-    my $file = shift;
-
-    die("File not found")
-      if(! -e $file);
-    die("Permission denied hashing file")
-      if(! -r $file);
-
-    open(my $h, $file) or die("Problem opening file for hashing");
-        
-    my $hash = Digest::MD5->new();
-    $hash->addfile($h);
-    close($h);
-
-    return $hash->hexdigest();
 }
 
 1;

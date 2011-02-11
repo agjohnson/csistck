@@ -8,6 +8,7 @@ use base 'Exporter';
 our @EXPORT_OK = qw/file/;
 
 use Csistck::Oper qw/debug/;
+use Csistck::Util qw/backup_file hash_file/;
 use Csistck::Test;
 
 use Digest::MD5;
@@ -55,6 +56,9 @@ sub file_check {
 # Copy file to destination
 sub file_install {
     my ($src, $dest) = @_;
+    
+    backup_file($dest)
+      if(-f -e -r $dest);
 
     debug("Copying file: <src=$src> <dest=$dest>");
     copy($src, $dest) or die("Failed to copy file: $!");
@@ -68,36 +72,11 @@ sub file_compare {
     return 0 unless (scalar @files == 2);
 
     # Get hashes and return compare
-    my ($hasha, $hashb) = map file_hash($_), @files;
+    my ($hasha, $hashb) = map hash_file($_), @files;
 
     debug(sprintf "File compare result: <hash=%s> <hash=%s>", $hasha, $hashb);
     
     return ($hasha eq $hashb);
-}
-
-# Hash file, return hash or die if error
-sub file_hash {
-    my $file = shift;
-
-    debug("<file=$file>: Hashing file");
-
-    # Errors to die on
-    die("File does not exist")
-      if (! -e $file);
-    die("File not readable")
-      if (! -r $file);
-
-    open(my $h, $file) or die("Error opening file: $!");
-        
-    my $hash = Digest::MD5->new();
-    $hash->addfile($h);
-    close($h);
-
-    my $digest = $hash->hexdigest();
-
-    debug(sprintf "<file=%s> <hash=%s>: File hash successful", $file, $digest);
-
-    return $digest;    
 }
 
 1;
