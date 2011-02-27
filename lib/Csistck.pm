@@ -18,6 +18,7 @@ our @EXPORT = qw(
     noop
     permission
     pkg
+    script
     template
 );
 
@@ -27,6 +28,7 @@ use Csistck::Test::NOOP qw/noop/;
 use Csistck::Test::File qw/file/;
 use Csistck::Test::Permission qw/permission/;
 use Csistck::Test::Pkg qw/pkg/;
+use Csistck::Test::Script qw/script/;
 use Csistck::Test::Template qw/template/;
 
 use Sys::Hostname;
