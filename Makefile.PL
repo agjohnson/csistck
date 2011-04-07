@@ -16,5 +16,5 @@ WriteMakefile(
     }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Csistck.pm', # retrieve abstract from module
-       AUTHOR         => 'A. U. Thor <anthony@(none)>') : ()),
+       AUTHOR         => 'Anthony Johnson <anthony@ohess.org>') : ()),
 );
