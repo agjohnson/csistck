@@ -118,7 +118,7 @@ __END__
 =head1 NAME
 
 
-Csistck - Perl extension for blah blah blah
+Csistck - Perl system consistency check framework
 
 =head1 SYNOPSIS
 
@@ -143,46 +143,142 @@ The script can then be called directly, using command line arguements below
 
 =head1 DESCRIPTION
 
-Csistck is a configuration management tool that falls somewhere in between
-the management tools slack and chef.
+Csistck is a small Perl framework for writing scripts to maintain system 
+configuration and consistency. The focus of csistck is to stay lightweight,
+simple, and flexible.
 
-The model of csistck is more complex than slack, requiring syntax knowledge 
-of Perl and knowledge of csistck calls. However, having used slack for a 
-short period of time -- and having struggled to adapt slightly more complex
-usage to slacks's simplistic model -- csistck was designed under a similar
-philosophy goal to keep usage as simple as possible.
+=head1 METHODS
 
-To say chef is more complex than csistck is a heavy understatement. The model
-of csistck clearly pulls from chef, however the aim of csistck isn't meant to be
-a mere port of chef to Perl. Where both chef and csistck aim to provide
-consistency checks, csistck does not aim to provide the depth of checks 
-and resolution that chef provides. 
+=head2 Options
+
+=over
+
+=item option($name, $value)
+
+Set option to specified value.
+
+=back
+
+
+=head3 Available Options
+
+=over
+
+=item pkg_type [string]
+
+Set package type
+
+=back
+
+
+
+=head2 Defining Hosts and Roles
+
+=over
+
+=item host($hostname, [@tests]);
+
+Append test or array of tests to host definition.
+
+    host 'hostname' => noop(1), noop(1);
+    host 'hostname' => noop(0);
+
+Returns a reference to the host object.
+
+=item role($rolename, [@tests]);
+
+Append test or array of tests to role definition.
+    
+    role 'test' => noop(0);
+    host 'hostname' => role('test');
+
+Returns a reference to the role object.
+
+=back
+
+=head2 Tests
+
+=over
+
+=item noop($return)
+
+"No operation" test, used only for testing or placeholders.
+
+    role 'test' => noop(1);
+
+=item file($glob, $target)
+
+Copy files matching file glob pattern to target directory. 
+
+    role 'test' => file("lighttpd/app/*.conf", "/etc/lighttpd");
+
+See L<Csistck::Test::File>
+
+=item template($template, $target, [%args])
+
+Process file $template as a Template Toolkit template, output to path $target.
+Hashref %args is passed to the template processor.
+
+    role 'test' => template("sys/motd", "/etc/motd", { hot => 'dog' });
+
+See L<Csistck::Test::Template>
+
+=item permission($glob, %args)
+
+Change permissions on files matching file glob pattern
+
+    role 'test' => permission("/etc/couchdb/*", {
+      mode => '0640',
+      uid => 130,
+      gid => 130
+    });
+
+See L<Csistck::Test::Permission>
+
+=item script($script, [@arguments])
+
+Call script with specified arguments 
+
+    role 'test' => script("apache2/mod-check", "rewrite");
+
+See L<Csistck::Test::Script>
+
+=item pkg($package, [$type])
+
+Check for package using system package manager.
+
+    option 'pkg_type' => 'dpkg';
+    role 'test' => pkg("lighttpd");
+
+See L<Csistck::Test::Pkg>
+
+=back
 
 =head1 SCRIPT USAGE
 
-The following options are recognized in a csistck based script
+The following command line options are recognized in a csistck based script
 
-=over 8
+=over
 
 =item B<--okay>
 
-Display okay returns on tests
+Enable reporting of okay returns on tests
 
 =item B<--fail>
 
-Display failure returns on tests
+Enable reporting of failure returns on tests
 
 =item B<--debug>
 
-Display debug messages
+Enable reporting of debug messages
 
-=item B<--diff>
+=item B<--check>
 
-Display file diff and test differences
+Run script in system check mode, do not run repair operations. (default)
 
-=item B<--fix>
+=item B<--repair>
 
-Fix differences in files and tests
+Run script in system repair mode
 
 =back
 
@@ -192,12 +288,24 @@ Anthony Johnson, E<lt>anthony@ohess.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2011 by Anthony Johnson
+Copyright (c) 2011 Anthony Johnson
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.10.1 or,
-at your option, any later version of Perl 5 you may have available.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 
 =cut
-

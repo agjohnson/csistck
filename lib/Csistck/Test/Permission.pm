@@ -185,3 +185,59 @@ sub gid_repair {
 
 
 1;
+__END__
+
+=head1 NAME
+
+Csistck::Test::Permission - Csistck permission check
+
+=head1 DESCRIPTION
+
+=head1 METHODS
+
+=head2 permission($glob, %args)
+
+Change permission and ownership on file glob pattern. Arguments should be
+passed as a hashref that consists of any of the following keys:
+
+=over
+
+=item mode =E<gt> [string]
+
+Change files matching file glob pattern to the specified numerical mode. Mode
+should be specified as a string of numbers, ie: '0755'.
+
+=item uid =E<gt> [integer]
+
+Change owner of files matching file glob pattern to the specified user ID.
+
+=item gid =E<gt> [integer]
+
+Change group of files matching file glob pattern to the specified group ID.
+
+=back
+
+=head1 AUTHOR
+
+Anthony Johnson, E<lt>anthony@ohess.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2011 Anthony Johnson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+
