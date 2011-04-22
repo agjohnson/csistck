@@ -117,13 +117,9 @@ __END__
 
 =head1 NAME
 
-
 Csistck - Perl system consistency check framework
 
 =head1 SYNOPSIS
-
-A simple example of using csistck to create an executable management
-script:
 
     use Csistck;
     
@@ -149,34 +145,30 @@ simple, and flexible.
 
 =head1 METHODS
 
-=head2 Options
-
-=over
-
-=item option($name, $value)
+=head2 option($name, $value)
 
 Set option to specified value.
 
-=back
-
-
 =head3 Available Options
 
-=over
+=over 3
 
-=item pkg_type [string]
+=item *
+
+pkg_type [string]
 
 Set package type
 
+=item *
+
+domain_name [string]
+
+Set default domain name to append to hosts
+
 =back
 
 
-
-=head2 Defining Hosts and Roles
-
-=over
-
-=item host($hostname, [@tests]);
+=head2 host($hostname, [@tests]);
 
 Append test or array of tests to host definition.
 
@@ -185,7 +177,7 @@ Append test or array of tests to host definition.
 
 Returns a reference to the host object.
 
-=item role($rolename, [@tests]);
+=head2 role($rolename, [@tests]);
 
 Append test or array of tests to role definition.
     
@@ -194,19 +186,14 @@ Append test or array of tests to role definition.
 
 Returns a reference to the role object.
 
-=back
 
-=head2 Tests
-
-=over
-
-=item noop($return)
+=head2 noop($return)
 
 "No operation" test, used only for testing or placeholders.
 
     role 'test' => noop(1);
 
-=item file($glob, $target)
+=head2 file($glob, $target)
 
 Copy files matching file glob pattern to target directory. 
 
@@ -214,7 +201,7 @@ Copy files matching file glob pattern to target directory.
 
 See L<Csistck::Test::File>
 
-=item template($template, $target, [%args])
+=head2 template($template, $target, [%args])
 
 Process file $template as a Template Toolkit template, output to path $target.
 Hashref %args is passed to the template processor.
@@ -223,7 +210,7 @@ Hashref %args is passed to the template processor.
 
 See L<Csistck::Test::Template>
 
-=item permission($glob, %args)
+=head2 permission($glob, %args)
 
 Change permissions on files matching file glob pattern
 
@@ -235,7 +222,7 @@ Change permissions on files matching file glob pattern
 
 See L<Csistck::Test::Permission>
 
-=item script($script, [@arguments])
+=head2 script($script, [@arguments])
 
 Call script with specified arguments 
 
@@ -243,7 +230,7 @@ Call script with specified arguments
 
 See L<Csistck::Test::Script>
 
-=item pkg($package, [$type])
+=head2 pkg($package, [$type])
 
 Check for package using system package manager.
 
@@ -252,7 +239,6 @@ Check for package using system package manager.
 
 See L<Csistck::Test::Pkg>
 
-=back
 
 =head1 SCRIPT USAGE
 
@@ -260,23 +246,33 @@ The following command line options are recognized in a csistck based script
 
 =over
 
-=item B<--okay>
+=item *
+
+B<--okay>
 
 Enable reporting of okay returns on tests
 
-=item B<--fail>
+=item *
+
+B<--fail>
 
 Enable reporting of failure returns on tests
 
-=item B<--debug>
+=item *
+
+B<--debug>
 
 Enable reporting of debug messages
 
-=item B<--check>
+=item *
+
+B<--check>
 
 Run script in system check mode, do not run repair operations. (default)
 
-=item B<--repair>
+=item *
+
+B<--repair>
 
 Run script in system repair mode
 
