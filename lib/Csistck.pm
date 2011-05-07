@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.01.2';
+our $VERSION = '0.02';
 
 # We export function in the main namespace
 use base 'Exporter';
@@ -30,6 +30,8 @@ use Csistck::Test::Permission qw/permission/;
 use Csistck::Test::Pkg qw/pkg/;
 use Csistck::Test::Script qw/script/;
 use Csistck::Test::Template qw/template/;
+
+use Csistck::Term;
 
 use Sys::Hostname;
 use Data::Dumper;
@@ -102,13 +104,20 @@ sub process {
             &{$obj};
         }
         when ("Csistck::Test") {
-            # Check is mandatory, repair if check is bad and we're repairing
+            # Check is mandatory, if auto repair is set, repair, otherwise prompt
             if (!$obj->check()) {
-                $obj->repair()
-                  if (Csistck::Oper::repair());
+                if (Csistck::Oper::repair()) {
+                    $obj->repair()
+                }
+                else {
+                    Csistck::Term::prompt(
+                      repair => sub { $obj->repair },
+                      diff => sub { $obj->diff } 
+                    );
+                }
             }
         }
-        default { die(sprintf("Unkown object reference: ", ref $obj)); }
+        default { die(sprintf("Unkown object reference: ref=<%s>", ref $obj)); }
     }
 }
 
@@ -242,39 +251,34 @@ See L<Csistck::Test::Pkg>
 
 =head1 SCRIPT USAGE
 
+Scripts based on csistck will run in an interactive mode by default. 
 The following command line options are recognized in a csistck based script
 
 =over
 
 =item *
 
-B<--okay>
+B<--[no]repair>
 
-Enable reporting of okay returns on tests
-
-=item *
-
-B<--fail>
-
-Enable reporting of failure returns on tests
+Automate repair mode, do not run in interactive mode.
 
 =item *
 
-B<--debug>
+B<--[no]verbose>
 
-Enable reporting of debug messages
-
-=item *
-
-B<--check>
-
-Run script in system check mode, do not run repair operations. (default)
+Toggle verbose reporting of events
 
 =item *
 
-B<--repair>
+B<--[no]debug>
 
-Run script in system repair mode
+Toggle debug reporting of events
+
+=item *
+
+B<--[no]quiet>
+
+Toggle event reporting of errors
 
 =back
 

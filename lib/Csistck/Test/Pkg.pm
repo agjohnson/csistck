@@ -23,9 +23,9 @@ sub pkg {
       unless (defined $type);
 
     return Csistck::Test->new(
-        sub { pkg_check($pkg, $type); },
-        sub { pkg_install($pkg, $type); },
-        "Searching for package $pkg, using $type"
+        check => sub { pkg_check($pkg, $type); },
+        repair => sub { pkg_install($pkg, $type); },
+        desc => "Searching for package $pkg, using $type"
     );
 }
 
@@ -43,7 +43,7 @@ sub pkg_check {
         when ('pacman') { $cmd = "pacman -Qe \"$pkg\""; };
     }
     
-    debug("Searching for package via command: $cmd");
+    debug("Searching for package via command: cmd=<$cmd>");
     
     my $ret = system("$cmd 1>/dev/null 2>/dev/null");
 
@@ -68,7 +68,7 @@ sub pkg_install {
         when ("pacman") { $cmd = "pacman -Sq --noconfirm \"$pkg\""; };
     }
     
-    debug("Installing package via command: $cmd");
+    debug("Installing package via command: cmd=<$cmd>");
 
     my $ret = system("$cmd 1>/dev/null 2>/dev/null");
 

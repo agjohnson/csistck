@@ -25,9 +25,9 @@ sub noop {
     }
 
     return Csistck::Test->new(
-        sub { noop_check($result); },
-        sub { noop_check($result); },
-        "NOOP test"
+        check => sub { noop_check($result); },
+        repair => sub { noop_check($result); },
+        desc => "NOOP test"
     );
 }
 

@@ -23,9 +23,9 @@ sub script {
     my @args = @_;
 
     return Csistck::Test->new(
-        sub { script_run(MODE_CHECK, $script, @args); },
-        sub { script_run(MODE_RUN, $script, @args); },
-        "Executing script $script"
+        check => sub { script_run(MODE_CHECK, $script, @args); },
+        repair => sub { script_run(MODE_RUN, $script, @args); },
+        desc => "Executing script $script"
     );
 }
 
@@ -39,7 +39,7 @@ sub script_run {
     # Build command
     my @command = ($script, $mode, @args);
     
-    debug(sprintf("Run command: %s", join(" ", @command)));
+    debug(sprintf("Run command: cmd=<%s>", join(" ", @command)));
     
     # my $ret = system("$cmd 1>/dev/null 2>/dev/null");
     chdir($FindBin::Bin);

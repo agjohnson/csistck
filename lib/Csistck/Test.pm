@@ -8,19 +8,21 @@ use Csistck::Oper;
 
 sub new {
     my $class = shift;
-    my ($check, $repair, $desc) = @_;
-
+    my %args = @_;
+    my $args = \%args;
+    
     # Require both functions
     die ("Check subroutine not specified")
-      unless (defined $check);
+      unless (defined $args->{check});
     die ("Repair subroutine not specified")
-      unless (defined $repair);
+      unless (defined $args->{repair});
 
     # Build Test object to bless and return
     my $self = {};
-    $self->{CHECK} = $check;
-    $self->{REPAIR} = $repair;
-    $self->{DESC} = $desc // "Unidentified test";
+    $self->{CHECK} = $args->{check};
+    $self->{REPAIR} = $args->{repair};
+    $self->{DIFF} = $args->{diff} // undef;
+    $self->{DESC} = $args->{desc} // "Unidentified test";
     bless $self, $class;
     return $self;
 }
@@ -38,11 +40,11 @@ sub check {
     if ($@) {
         my $error = $@;
         $error =~ s/ at [A-Za-z0-9\/\_\-\.]+ line [0-9]+.\n//;
-        Csistck::Oper::fail("$self->{DESC}: $error");
+        Csistck::Oper::error("$self->{DESC}: $error");
         return 0;
     }
     else {
-        Csistck::Oper::okay("$self->{DESC}");
+        Csistck::Oper::info("$self->{DESC}");
         return 1;
     }   
 }
@@ -60,13 +62,31 @@ sub repair {
     if ($@) {
         my $error = $@;
         $error =~ s/ at [A-Za-z0-9\/\_\-\.]+ line [0-9]+.\n//;
-        Csistck::Oper::fail("Repairing $self->{DESC}: $error");
+        Csistck::Oper::error("Repairing $self->{DESC}: $error");
         return 0;
     }
     else {
-        Csistck::Oper::okay("Repairing $self->{DESC}");
+        Csistck::Oper::info("Repairing $self->{DESC}");
         return 1;
     }   
+}
+
+# Diff, show some form of diff for interactive mode
+sub diff {
+    my $self = shift;
+
+    # No diff code defined
+    unless (defined $self->{DIFF}) {
+        return 1;
+    }
+
+    die ("Not a code reference")
+      unless (ref $self->{DIFF} eq "CODE");
+
+    # Execute code reference in eval, return response
+    eval { &{$self->{DIFF}}; };
+
+    return 1;
 }
 
 1;

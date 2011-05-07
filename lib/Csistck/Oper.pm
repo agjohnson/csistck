@@ -7,28 +7,33 @@ use warnings;
 use base 'Exporter';
 
 our @EXPORT_OK = qw/
-    check repair
-    okay fail debug
+    debug error info
+    repair
 /;
 
 use Carp;
 use Getopt::Long;
 
-# For now, constant referencing from strings isn't working out.
+# Logging levels, default boolean
 our $Modes = { 
-    check => 1,
-    repair => 0,
-    okay => 0, 
-    fail => 1, 
-    debug => 0
+    debug => 0,
+    error => 1,
+    info => 0
 };
 
-# Dynamic setup of functions for levels
+# Boolean options
+our $Options = {
+    verbose => 0,
+    debug => 0,
+    quiet => 0,
+    repair => 0
+};
+
+# Dynamic setup of reporting functions
 for my $level (keys %{$Modes}) {
 
     no strict 'refs';
 
-    # Set up reporting functions
     *{"Csistck\::Oper\::$level"} = sub {
         my $func = shift;
 
@@ -48,18 +53,30 @@ for my $level (keys %{$Modes}) {
     };
 }
 
+# Repair mode accessor
+sub repair {
+    return $Options->{repair};
+}
+
 # Set up mode via command line options
 sub set_mode_by_cli {
-    # Map mode (as getopt negatable option) to $Modes
-    my %opts = map { +"$_!" => \$Modes->{$_} } keys %{$Modes};
-    my $result = GetOptions( %opts );
+
+    # Map options (as getopt negatable option) to $Options
+    # TODO more options
+    my %opts = map { +"$_!" => \$Options->{$_} } keys %{$Options};
+    my $result = GetOptions(%opts);
+
+    # Set reporting mode based on options
+    $Modes->{info} = ($Options->{verbose}) ? 1 : 0;
+    $Modes->{debug} = ($Options->{debug}) ? 1 : 0;
+    $Modes->{error} = ($Options->{quiet}) ? 0 : 1;
 }
 
 sub log_message {
     my $level = shift;
     my $msg = shift;
     
-    say "$level\: $msg";
+    printf("[%s]\ %s\n", uc($level), $msg);
 }
 
 1;

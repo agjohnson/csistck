@@ -33,9 +33,9 @@ sub permission_build_test {
      if (!defined $args or !ref $args eq "HASH");
     
     return Csistck::Test->new(
-        sub { permission_process($src, $args); },
-        sub { permission_process($src, $args); },
-        "Permission check on $_"
+        check => sub { permission_process($src, $args); },
+        repair => sub { permission_process($src, $args); },
+        desc => "Permission check on $_"
     );
 }
 
@@ -112,7 +112,7 @@ sub mode_compare {
 
     if ($fh) {
         my $curmode = sprintf "%04o", $fh->mode & 07777;
-        debug("<file=$file> <mode=$curmode>");
+        debug("File mode: file=<$file> mode=<$curmode>");
         return ($curmode eq $mode);
     }
 
@@ -123,7 +123,7 @@ sub mode_compare {
 sub mode_repair {
     my ($file, $mode) = @_;
 
-    debug("Chmod file: <file=$file> <mode=$mode>");
+    debug("Chmod file: file=<$file> mode=<$mode>");
     
     chmod(oct($mode), $file) or die("Failed to chmod file: $file") if (fix());
 
@@ -138,7 +138,7 @@ sub uid_compare {
 
     if ($fh) {
         my $curuid = $fh->uid;
-        debug("<file=$file> <uid=$uid>");
+        debug("File owner: file=<$file> uid=<$uid>");
         return ($curuid == $uid);
     }
 
@@ -149,7 +149,7 @@ sub uid_compare {
 sub uid_repair {
     my ($file, $uid) = @_;
 
-    debug("Chown file: <file=$file> <uid=$uid>");
+    debug("Chown file: file=<$file> uid=<$uid>");
     
     chown($uid, -1, $file) or die("Failed to chown file: $file") if (fix());
 
@@ -164,7 +164,7 @@ sub gid_compare {
 
     if ($fh) {
         my $curgid = $fh->gid;
-        debug("<file=$file> <uid=$gid>");
+        debug("File group: file=<$file> gid=<$gid>");
         return ($curgid == $gid);
     }
 
@@ -175,7 +175,7 @@ sub gid_compare {
 sub gid_repair {
     my ($file, $gid) = @_;
 
-    debug("Chown file: <file=$file> <gid=$gid>");
+    debug("Chown file: file=<$file> gid=<$gid>");
     
     chown(-1, $gid, $file) or die("Failed to chown file: $file") if (fix());
 

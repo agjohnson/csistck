@@ -15,6 +15,7 @@ use Template;
 use File::Copy;
 use Sys::Hostname;
 use FindBin;
+use Text::Diff ();
 
 sub template {
     my $template = shift;
@@ -37,9 +38,10 @@ sub template {
     };
 
     return Csistck::Test->new(
-      sub { template_check($abs_tpl, $dest, $args_add); },
-      sub { template_install($abs_tpl, $dest, $args_add); },
-      "Process template $template for destination $dest"
+      check => sub { template_check($abs_tpl, $dest, $args_add); },
+      repair => sub { template_install($abs_tpl, $dest, $args_add); },
+      diff => sub { template_diff($abs_tpl, $dest, $args_add); },
+      desc => "Process template $template for destination $dest"
     );
 }
 
@@ -48,7 +50,7 @@ sub template_check {
     my $tplout;
 
     template_file($template, \$tplout, $args)
-      or die("Template file $template not processed");
+      or die("Template file not processed: template=<$template>");
     
     my $hashsrc = hash_string($tplout);
     my $hashdst = hash_file($dest);
@@ -72,12 +74,30 @@ sub template_install {
     backup_file($dest)
       if (-f -e -r $dest);
 
-    debug("Output template <template=$template> <dest=$dest>");
+    debug("Output template: template=<$template> dest=<$dest>");
 
     open(my $h, '>', $dest) 
       or die("Permission denied writing template");
     template_file($template, $h, $args);
     close($h);
+}
+
+sub template_diff {
+    my ($template, $dest, $args) = @_;
+
+    # Try to catch some errors
+    if (-e $dest) {
+        die("Destination exists and is not a file: dest=<$dest>")
+          if (-d $dest);
+        die("Destination exists is is not writable: dest=<$dest>")
+          if (-f $dest and ! -w $dest);
+    }
+        
+    if (-f -e -r $dest) {
+        my $temp_h;
+        template_file($template, \$temp_h, $args);
+        say(Text::Diff::diff($dest, \$temp_h));
+    }
 }
 
 # Processing absoulte template name and outputs to reference
