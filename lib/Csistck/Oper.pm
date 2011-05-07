@@ -16,7 +16,7 @@ use Getopt::Long;
 
 # For now, constant referencing from strings isn't working out.
 our $Modes = { 
-    check => 1,
+    check => 0,
     repair => 0,
     okay => 0, 
     fail => 1, 
