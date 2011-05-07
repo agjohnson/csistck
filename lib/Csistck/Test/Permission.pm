@@ -33,9 +33,9 @@ sub permission_build_test {
      if (!defined $args or !ref $args eq "HASH");
     
     return Csistck::Test->new(
-        sub { permission_process($src, $args); },
-        sub { permission_process($src, $args); },
-        "Permission check on $_"
+        check => sub { permission_process($src, $args); },
+        repair => sub { permission_process($src, $args); },
+        desc => "Permission check on $_"
     );
 }
 

@@ -31,6 +31,8 @@ use Csistck::Test::Pkg qw/pkg/;
 use Csistck::Test::Script qw/script/;
 use Csistck::Test::Template qw/template/;
 
+use Csistck::Term;
+
 use Sys::Hostname;
 use Data::Dumper;
 
@@ -102,10 +104,17 @@ sub process {
             &{$obj};
         }
         when ("Csistck::Test") {
-            # Check is mandatory, repair if check is bad and we're repairing
+            # Check is mandatory, if auto repair is set, repair, otherwise prompt
             if (!$obj->check()) {
-                $obj->repair()
-                  if (Csistck::Oper::repair());
+                if (Csistck::Oper::repair()) {
+                    $obj->repair()
+                }
+                else {
+                    Csistck::Term::prompt(
+                      repair => sub { $obj->repair },
+                      diff => sub { $obj->diff } 
+                    );
+                }
             }
         }
         default { die(sprintf("Unkown object reference: ", ref $obj)); }

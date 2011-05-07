@@ -37,9 +37,9 @@ sub template {
     };
 
     return Csistck::Test->new(
-      sub { template_check($abs_tpl, $dest, $args_add); },
-      sub { template_install($abs_tpl, $dest, $args_add); },
-      "Process template $template for destination $dest"
+      check => sub { template_check($abs_tpl, $dest, $args_add); },
+      repair => sub { template_install($abs_tpl, $dest, $args_add); },
+      desc => "Process template $template for destination $dest"
     );
 }
 

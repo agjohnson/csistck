@@ -23,9 +23,9 @@ sub script {
     my @args = @_;
 
     return Csistck::Test->new(
-        sub { script_run(MODE_CHECK, $script, @args); },
-        sub { script_run(MODE_RUN, $script, @args); },
-        "Executing script $script"
+        check => sub { script_run(MODE_CHECK, $script, @args); },
+        repair => sub { script_run(MODE_RUN, $script, @args); },
+        desc => "Executing script $script"
     );
 }
 

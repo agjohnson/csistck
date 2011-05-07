@@ -23,9 +23,9 @@ sub pkg {
       unless (defined $type);
 
     return Csistck::Test->new(
-        sub { pkg_check($pkg, $type); },
-        sub { pkg_install($pkg, $type); },
-        "Searching for package $pkg, using $type"
+        check => sub { pkg_check($pkg, $type); },
+        repair => sub { pkg_install($pkg, $type); },
+        desc => "Searching for package $pkg, using $type"
     );
 }
 
