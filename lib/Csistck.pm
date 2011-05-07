@@ -251,39 +251,34 @@ See L<Csistck::Test::Pkg>
 
 =head1 SCRIPT USAGE
 
+Scripts based on csistck will run in an interactive mode by default. 
 The following command line options are recognized in a csistck based script
 
 =over
 
 =item *
 
-B<--okay>
+B<--[no]repair>
 
-Enable reporting of okay returns on tests
-
-=item *
-
-B<--fail>
-
-Enable reporting of failure returns on tests
+Automate repair mode, do not run in interactive mode.
 
 =item *
 
-B<--debug>
+B<--[no]verbose>
 
-Enable reporting of debug messages
-
-=item *
-
-B<--check>
-
-Run script in system check mode, do not run repair operations. (default)
+Toggle verbose reporting of events
 
 =item *
 
-B<--repair>
+B<--[no]debug>
 
-Run script in system repair mode
+Toggle debug reporting of events
+
+=item *
+
+B<--[no]quiet>
+
+Toggle event reporting of errors
 
 =back
 

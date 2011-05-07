@@ -35,7 +35,8 @@ sub backup_file {
     my $dest = join '/', $dest_base, $hash;
 
     copy($file, $dest) or die("Backup failed");
-    debug("<file=$file> <dest=$dest>: Backup successful");
+
+    info("File $file backed: $dest");
 }
 
 # Hash file, return hash or die if error

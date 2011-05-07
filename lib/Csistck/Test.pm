@@ -40,11 +40,11 @@ sub check {
     if ($@) {
         my $error = $@;
         $error =~ s/ at [A-Za-z0-9\/\_\-\.]+ line [0-9]+.\n//;
-        Csistck::Oper::fail("$self->{DESC}: $error");
+        Csistck::Oper::error("$self->{DESC}: $error");
         return 0;
     }
     else {
-        Csistck::Oper::okay("$self->{DESC}");
+        Csistck::Oper::info("$self->{DESC}");
         return 1;
     }   
 }
@@ -62,11 +62,11 @@ sub repair {
     if ($@) {
         my $error = $@;
         $error =~ s/ at [A-Za-z0-9\/\_\-\.]+ line [0-9]+.\n//;
-        Csistck::Oper::fail("Repairing $self->{DESC}: $error");
+        Csistck::Oper::error("Repairing $self->{DESC}: $error");
         return 0;
     }
     else {
-        Csistck::Oper::okay("Repairing $self->{DESC}");
+        Csistck::Oper::info("Repairing $self->{DESC}");
         return 1;
     }   
 }

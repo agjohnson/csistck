@@ -62,6 +62,7 @@ sub file_install {
       if(-f -e -r $dest);
 
     debug("Copying file: <src=$src> <dest=$dest>");
+
     copy($src, $dest) or die("Failed to copy file: $!");
 }
 
