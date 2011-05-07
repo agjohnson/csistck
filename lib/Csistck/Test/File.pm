@@ -38,9 +38,10 @@ sub file_build_test {
     my $dest_abs = join "/", $dest, $src_base;
 
     return Csistck::Test->new(
-        sub { file_check($src, $dest_abs); },
-        sub { file_install($src, $dest_abs); },
-        "File check on $src"
+        check => sub { file_check($src, $dest_abs); },
+        repair => sub { file_install($src, $dest_abs); },
+        diff => sub { file_diff($src, $dest_abs); },
+        desc => "File check on $src"
     );
 }
 
@@ -63,6 +64,14 @@ sub file_install {
     debug("Copying file: <src=$src> <dest=$dest>");
 
     copy($src, $dest) or die("Failed to copy file: $!");
+}
+
+# Diff for files
+sub file_diff {
+    my ($src, $dest) = @_;
+
+    say(Text::Diff::diff($src, $dest))
+      if(-f -e -r $dest);
 }
 
 # Compare hashes between two files
