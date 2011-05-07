@@ -8,6 +8,7 @@ use base 'Exporter';
 
 our @EXPORT_OK = qw/
     debug error info
+    repair
 /;
 
 use Carp;
@@ -24,8 +25,8 @@ our $Modes = {
 our $Options = {
     verbose => 0,
     debug => 0,
-    repair => 0,
-    quiet => 0
+    quiet => 0,
+    repair => 0
 };
 
 # Dynamic setup of reporting functions
@@ -50,6 +51,11 @@ for my $level (keys %{$Modes}) {
             return $Modes->{$level};
         }
     };
+}
+
+# Repair mode accessor
+sub repair {
+    return $Options->{repair};
 }
 
 # Set up mode via command line options
