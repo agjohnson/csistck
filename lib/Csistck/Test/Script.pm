@@ -39,7 +39,7 @@ sub script_run {
     # Build command
     my @command = ($script, $mode, @args);
     
-    debug(sprintf("Run command: %s", join(" ", @command)));
+    debug(sprintf("Run command: cmd=<%s>", join(" ", @command)));
     
     # my $ret = system("$cmd 1>/dev/null 2>/dev/null");
     chdir($FindBin::Bin);

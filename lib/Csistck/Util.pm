@@ -21,7 +21,7 @@ use Csistck::Config qw/option/;
 sub backup_file {
     my $file = shift;
 
-    debug("<file=$file>: Backing up file");
+    debug("Backing up file: <file=$file>");
     
     # Get absolute backup path
     my $dest_base = option('backup_path') // join '/', $FindBin::Bin, 'backup';
@@ -36,14 +36,14 @@ sub backup_file {
 
     copy($file, $dest) or die("Backup failed");
 
-    info("File $file backed: $dest");
+    info("Backup succeeded: file=<$file> dest=<$dest>");
 }
 
 # Hash file, return hash or die if error
 sub hash_file {
     my $file = shift;
 
-    debug("<file=$file>: Hashing file");
+    debug("Hashing file: file=<$file>");
 
     # Errors to die on
     die("File does not exist")
@@ -59,7 +59,7 @@ sub hash_file {
 
     my $digest = $hash->hexdigest();
 
-    debug(sprintf "<file=%s> <hash=%s>: File hash successful", $file, $digest);
+    debug(sprintf "File hash successful: file=<%s> hash=<%s>", $file, $digest);
 
     return $digest;    
 }

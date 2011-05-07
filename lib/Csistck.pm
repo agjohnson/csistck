@@ -117,7 +117,7 @@ sub process {
                 }
             }
         }
-        default { die(sprintf("Unkown object reference: ", ref $obj)); }
+        default { die(sprintf("Unkown object reference: ref=<%s>", ref $obj)); }
     }
 }
 

@@ -50,7 +50,7 @@ sub template_check {
     my $tplout;
 
     template_file($template, \$tplout, $args)
-      or die("Template file $template not processed");
+      or die("Template file not processed: template=<$template>");
     
     my $hashsrc = hash_string($tplout);
     my $hashdst = hash_file($dest);
@@ -74,7 +74,7 @@ sub template_install {
     backup_file($dest)
       if (-f -e -r $dest);
 
-    debug("Output template <template=$template> <dest=$dest>");
+    debug("Output template: template=<$template> dest=<$dest>");
 
     open(my $h, '>', $dest) 
       or die("Permission denied writing template");
@@ -87,9 +87,9 @@ sub template_diff {
 
     # Try to catch some errors
     if (-e $dest) {
-        die("Destination $dest exists and is not a file")
+        die("Destination exists and is not a file: dest=<$dest>")
           if (-d $dest);
-        die("Destination $dest exists is is not writable")
+        die("Destination exists is is not writable: dest=<$dest>")
           if (-f $dest and ! -w $dest);
     }
         
