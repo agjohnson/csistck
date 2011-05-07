@@ -20,7 +20,9 @@ our $Modes = {
     repair => 0,
     okay => 0, 
     fail => 1, 
-    debug => 0
+    debug => 0,
+    error => 1,
+    info => 0
 };
 
 # Dynamic setup of functions for levels
@@ -59,7 +61,7 @@ sub log_message {
     my $level = shift;
     my $msg = shift;
     
-    say "$level\: $msg";
+    printf("[%s]\ %s\n", uc($level), $msg);
 }
 
 1;
