@@ -13,7 +13,8 @@ WriteMakefile(
         'Getopt::Long' => 0,
         'Sys::Hostname' => 0,
         'Template' => 0,
-        'Term::ReadKey' => 0
+        'Term::ReadKey' => 0,
+        'Text::Diff' => 0
     }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Csistck.pm', # retrieve abstract from module
