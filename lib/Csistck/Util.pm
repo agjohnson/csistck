@@ -25,16 +25,16 @@ sub backup_file {
     
     # Get absolute backup path
     my $dest_base = option('backup_path') // join '/', $FindBin::Bin, 'backup';
-    die("Backup path does not exist")
+    die("Backup path does not exist: path=<$dest_base>")
       if (! -e $dest_base);
-    die("Backup path is not writable")
+    die("Backup path is not writable: path=<$dest_base>")
       if (-e $dest_base and ! -w $dest_base);    
     
     # Get file hash, use this is a file name to copy to
     my $hash = hash_file($file);
     my $dest = join '/', $dest_base, $hash;
 
-    copy($file, $dest) or die("Backup failed");
+    copy($file, $dest) or die("Backup failed: $!: file=<$file> dest=<$dest>");
 
     info("Backup succeeded: file=<$file> dest=<$dest>");
 }
@@ -46,12 +46,12 @@ sub hash_file {
     debug("Hashing file: file=<$file>");
 
     # Errors to die on
-    die("File does not exist")
+    die("File does not exist: file=<$file>")
       if (! -e $file);
-    die("File not readable")
+    die("File not readable: file=<$file>")
       if (! -r $file);
 
-    open(my $h, $file) or die("Error opening file: $!");
+    open(my $h, $file) or die("Error opening file: $!: file=<$file>");
         
     my $hash = Digest::MD5->new();
     $hash->addfile($h);
