@@ -50,7 +50,7 @@ sub file_check {
     my $src = shift;
     my $dest = shift;
 
-    die("Files do not match")
+    die("Files do not match: src=<$src> dest=<$dest>")
       unless(file_compare($src, $dest));
 }
 
@@ -63,7 +63,7 @@ sub file_install {
 
     debug("Copying file: <src=$src> <dest=$dest>");
 
-    copy($src, $dest) or die("Failed to copy file: $!");
+    copy($src, $dest) or die("Failed to copy file: $!: src=<$src> dest=<$dest>");
 }
 
 # Diff for files
