@@ -12,7 +12,6 @@ WriteMakefile(
         'File::stat' => 0,
         'Getopt::Long' => 0,
         'Sys::Hostname::FQDN' => 0,
-        'Template' => 0
         'Template' => 0,
         'Term::ReadKey' => 0,
         'Text::Diff' => 0
