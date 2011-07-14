@@ -33,7 +33,7 @@ use Csistck::Test::Template qw/template/;
 
 use Csistck::Term;
 
-use Sys::Hostname;
+use Sys::Hostname::FQDN q/fqdn/;
 use Data::Dumper;
 
 # Package wide
@@ -77,7 +77,7 @@ sub role {
 
 # Main call to start processing
 sub check {
-    my $hostname = shift // hostname;
+    my $hostname = shift // fqdn;
 
     # Get options by command line
     Csistck::Oper::set_mode_by_cli();
