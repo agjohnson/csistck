@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # We export function in the main namespace
 use base 'Exporter';
@@ -33,7 +33,7 @@ use Csistck::Test::Template qw/template/;
 
 use Csistck::Term;
 
-use Sys::Hostname::FQDN q/fqdn/;
+use Sys::Hostname::Long q//;
 use Data::Dumper;
 
 # Package wide
@@ -77,7 +77,7 @@ sub role {
 
 # Main call to start processing
 sub check {
-    my $hostname = shift // fqdn;
+    my $hostname = shift // Sys::Hostname::Long::hostname_long();
 
     # Get options by command line
     Csistck::Oper::set_mode_by_cli();
