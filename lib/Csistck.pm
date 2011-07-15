@@ -33,7 +33,7 @@ use Csistck::Test::Template qw/template/;
 
 use Csistck::Term;
 
-use Sys::Hostname::Long q//;
+use Sys::Hostname::Long qw//;
 use Data::Dumper;
 
 # Package wide
