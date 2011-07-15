@@ -14,7 +14,7 @@ our @EXPORT_OK = qw/
     hash_string
 /;
 
-use Csistck::Oper qw/debug/;
+use Csistck::Oper qw/debug info/;
 use Csistck::Config qw/option/;
 
 # Backup single file
