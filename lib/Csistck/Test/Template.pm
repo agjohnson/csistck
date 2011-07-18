@@ -13,7 +13,7 @@ use Csistck::Test;
 
 use Template;
 use File::Copy;
-use Sys::Hostname;
+use Sys::Hostname::Long qw//;
 use FindBin;
 use Text::Diff ();
 
@@ -33,7 +33,7 @@ sub template {
 
     # Add automatic arguments
     my $args_add = {
-        hostname => hostname,
+        hostname => Sys::Hostname::Long::hostname_long(),
         %{$args}
     };
 
