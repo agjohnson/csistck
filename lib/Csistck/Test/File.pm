@@ -70,7 +70,7 @@ sub file_install {
 sub file_diff {
     my ($src, $dest) = @_;
 
-    say(Text::Diff::diff($src, $dest))
+    say(Text::Diff::diff($dest, $src))
       if(-f -e -r $dest);
 }
 
