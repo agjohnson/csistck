@@ -15,8 +15,9 @@ lib/Csistck/Test/Script.pm
 lib/Csistck/Test/Template.pm
 lib/Csistck/Util.pm
 t/00load.t
-t/exports.t
-t/friday.t
-t/hosts.t
-t/options.t
-t/roles.t
+t/01exports.t
+t/01friday.t
+t/02hosts.t
+t/02options.t
+t/02roles.t
+t/50bug11.t
