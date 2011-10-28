@@ -92,6 +92,9 @@ sub template_diff {
         die("Destination exists is is not writable: dest=<$dest>")
           if (-f $dest and ! -w $dest);
     }
+    else {
+        die("Destination file does not exist: dest=<$dest>");
+    }
         
     if (-f -e -r $dest) {
         my $temp_h;

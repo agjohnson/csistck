@@ -70,8 +70,12 @@ sub file_install {
 sub file_diff {
     my ($src, $dest) = @_;
 
-    say(Text::Diff::diff($dest, $src))
-      if(-f -e -r $dest);
+    if(-f -e -r $dest) {
+        say(Text::Diff::diff($dest, $src));
+    }
+    else {
+        die("Destination file does not exist: dest=<$dest>");
+    };
 }
 
 # Compare hashes between two files
