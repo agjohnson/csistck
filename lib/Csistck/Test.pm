@@ -33,8 +33,9 @@ sub check {
 
     die ("Not a code reference")
       unless (ref $self->{CHECK} eq "CODE");
-
+    
     # Execute code reference in eval, return response
+    Csistck::Oper::info("$self->{DESC}");
     eval { &{$self->{CHECK}}; };
 
     if ($@) {
@@ -44,7 +45,6 @@ sub check {
         return 0;
     }
     else {
-        Csistck::Oper::info("$self->{DESC}");
         return 1;
     }   
 }
@@ -55,8 +55,9 @@ sub repair {
 
     die ("Not a code reference")
       unless (ref $self->{REPAIR} eq "CODE");
-
+    
     # Execute code reference in eval, return response
+    Csistck::Oper::info("Repairing $self->{DESC}");
     eval { &{$self->{REPAIR}}; };
 
     if ($@) {
@@ -66,7 +67,6 @@ sub repair {
         return 0;
     }
     else {
-        Csistck::Oper::info("Repairing $self->{DESC}");
         return 1;
     }   
 }
