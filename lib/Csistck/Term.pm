@@ -7,28 +7,34 @@ use warnings;
 use base 'Exporter';
 
 use Term::ReadKey;
+use Csistck::Test;
 
 our @EXPORT_OK = qw/
     prompt
 /;
 
-# Interactive terminal prompt
+# Interactive terminal prompt. Takes in test as argument, and displays action 
+# options
 sub prompt {
-    my %args = @_;
-    my $args = \%args;
+    my $test = shift;
     my %options;
 
-    # TODO check repair and diff are coderefs?
-
-    # Set repair and diff if defined
-    my $repair = $args->{repair} // undef;
-    my $diff = $args->{diff} // undef;
-    
-    # Ask question loop, get input
+    # Ask question loop, get input. If choices are not code refs, do not show choice
     say("What would you like to:");
-    say("  Y : Repair");
+    my @choices = ();
+    # Repair
+    if ($test->has_repair()) {
+        say("  Y : Repair");
+        push(@choices, 'Y');
+    }
+    # Skip
     say("  N : Skip");
-    say("  D : Diff");
+    push(@choices, 'n');
+    # DIff
+    if ($test->has_diff()) {
+        say("  D : Diff");
+        push(@choices, 'd');
+    }
     print("[Y/n/d]? ");
     
     ReadMode 3;
@@ -37,14 +43,13 @@ sub prompt {
     ReadMode 0;
     
     given ($action) {
-        when (/[Yy\n]/) { &{$repair} if (defined $repair); }
+        when (/[Yy\n]/) { 
+            $test->repair() if ($test->has_repair());
+        }
         when (/[Dd]/) { 
             # Show diff, loop through prompt again
-            &{$diff} if (defined $diff);
-            prompt(
-              repair => $repair,
-              diff => $diff
-            );
+            $test->diff() if ($test->has_diff());
+            prompt($test);
         }
         default {}
     }

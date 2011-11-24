@@ -110,10 +110,7 @@ sub process {
                     $obj->repair()
                 }
                 else {
-                    Csistck::Term::prompt(
-                      repair => sub { $obj->repair },
-                      diff => sub { $obj->diff } 
-                    );
+                    Csistck::Term::prompt($obj);
                 }
             }
         }
