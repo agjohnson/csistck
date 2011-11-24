@@ -1,3 +1,5 @@
+.hgignore
+.hgtags
 Changes
 MANIFEST
 Makefile.PL
@@ -21,3 +23,4 @@ t/02hosts.t
 t/02options.t
 t/02roles.t
 t/50bug11.t
+t/50bug14.t
