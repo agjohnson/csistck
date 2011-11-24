@@ -22,9 +22,16 @@ sub pkg {
     $type = option('pkg_type') // 'dpkg'
       unless (defined $type);
 
+    # Currently, only dpkg support package install diff
+    my $diff = undef;
+    if ($type eq 'dpkg') {
+        $diff = sub { pkg_diff($pkg, $type); };
+    }
+
     return Csistck::Test->new(
         check => sub { pkg_check($pkg, $type); },
         repair => sub { pkg_install($pkg, $type); },
+        diff => $diff,
         desc => "Searching for package $pkg, using $type"
     );
 }
@@ -73,6 +80,31 @@ sub pkg_install {
     my $ret = system("$cmd 1>/dev/null 2>/dev/null");
 
     die("Package installation failed")
+      unless ($ret == 0);
+}
+
+# Package diff
+sub pkg_diff {
+    my ($pkg, $type) = @_;
+    my $cmd = "";
+    
+    # Test package name
+    die('Invalid package name')
+      unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
+    
+    given ($type) {
+        when ("dpkg") { 
+            $ENV{DEBIAN_FRONTEND} = "noninteractive";
+            $cmd = "apt-get -s install \"$pkg\""; 
+        }
+        default {}
+    }
+    
+    debug("Showing package differences via command: cmd=<$cmd>");
+
+    my $ret = system("$cmd 1>/dev/null 2>/dev/null");
+
+    die("Package differences query failed")
       unless ($ret == 0);
 }
 
