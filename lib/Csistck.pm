@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.07';
+our $VERSION = '0.07_01';
 
 # We export function in the main namespace
 use base 'Exporter';
@@ -31,6 +31,7 @@ use Csistck::Test::Pkg qw/pkg/;
 use Csistck::Test::Script qw/script/;
 use Csistck::Test::Template qw/template/;
 
+use Csistck::Role;
 use Csistck::Term;
 
 use Sys::Hostname::Long qw//;
@@ -97,6 +98,11 @@ sub process {
     given (ref $obj) {
         when ("ARRAY") {
             foreach my $subobj (@{$obj}) {
+                process($subobj);
+            }
+        }
+        when ("Csistck::Role") {
+            foreach my $subobj (@{$obj->get_tests()}) {
                 process($subobj);
             }
         }
