@@ -3,3 +3,7 @@ test.pl
 .files
 blib
 Makefile.old
+MYMETA.yml
+Makefile
+pm_to_blib
+

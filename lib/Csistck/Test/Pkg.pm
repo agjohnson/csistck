@@ -13,16 +13,62 @@ use Csistck::Test;
 
 use Digest::MD5;
 use File::Basename;
+use Linux::Distribution qw/distribution_name/;
+
+=head1 NAME
+
+Csistck::Test::Pkg - Csistck package check
+
+=head1 METHODS
+
+=head2 pkg($package, [$type])
+
+Test for existing package using forks to system package managers. Package can be
+specified as a string, or as a hashref:
+
+  pkg({
+      dpkg => 'test-server',
+      emerge => 'net-test',
+      default => 'test-server'
+  });
+
+The package manager will be automatically detected if none is explicitly
+specified, and the hashref key matching the package manager decides the package
+name to check. If a default key is provided, that package is used by default.
+
+In repair mode, install the package quietly, unless package manager doesn't
+handle automating install.
+
+Supported package managers:
+
+=over
+
+=item dpkg
+
+Debian package management utility
+
+=item pacman
+
+Arch linux package management utility
+
+=item More planned..
+
+=back
+
+=cut 
 
 sub pkg {
-    my $pkg = shift;
+    my $pkgref = shift;
     my $type = shift;
+    my $pkg;
 
-    # Default package type
-    $type = option('pkg_type') // 'dpkg'
-      unless (defined $type);
+    # Priority: 'type' argument, 'pkg_type' option, detect_pkg_manager
+    if (! $type) {
+        $type = option('pkg_type') // detect_pkg_manager();
+    }
+    $pkg = get_pkg($pkgref, $type);
 
-    # Currently, only dpkg support package install diff
+    # Not all managers support "diff" of packages
     my $diff = undef;
     if ($type eq 'dpkg') {
         $diff = sub { pkg_diff($pkg, $type); };
@@ -39,10 +85,6 @@ sub pkg {
 sub pkg_check {
     my ($pkg, $type) = @_;
     my $cmd = "";
-
-    # Test package name
-    die('Invalid package name')
-      unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
 
     # Decide command, execute. Die on failure
     given ($type) {
@@ -62,10 +104,6 @@ sub pkg_check {
 sub pkg_install {
     my ($pkg, $type) = @_;
     my $cmd = "";
-    
-    # Test package name
-    die('Invalid package name')
-      unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
     
     given ($type) {
         when ("dpkg") { 
@@ -88,10 +126,6 @@ sub pkg_diff {
     my ($pkg, $type) = @_;
     my $cmd = "";
     
-    # Test package name
-    die('Invalid package name')
-      unless ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
-    
     given ($type) {
         when ("dpkg") { 
             $ENV{DEBIAN_FRONTEND} = "noninteractive";
@@ -108,39 +142,63 @@ sub pkg_diff {
       unless ($ret == 0);
 }
 
+=head2 detect_pkg_manager()
+
+Detect package manager based on system OS and Linux distribution if
+applicable. Return package manager as string. This is not exported, it is 
+used for the package test.
+
+=cut
+
+sub detect_pkg_manager {
+    given ("$^O") {
+        when (/^freebsd$/) { return 'pkg_info'; }
+        when (/^netbsd$/) { return 'pkg_info'; }
+        when (/^linux$/) { 
+            given (distribution_name()) {
+                when (/^(?:debian|ubuntu)$/) { return 'dpkg'; }
+                when (/^(?:fedora|redhat|centos)$/) { return 'rpm'; }
+                when (/^gentoo$/) { return 'emerge'; }
+                when (/^arch$/) { return 'pacman'; }
+                default { return undef; }
+            }
+        }
+        when (/^darwin$/) { return undef; }
+        default { return undef; }
+    }
+}
+
+=head2 get_pkg($package, $type)
+
+Based on input package, return package name. With OS and distribution detection,
+$package can be passed as a string or a hashref.
+
+See pkg() for information on passing hashrefs as package name
+
+=cut
+
+sub get_pkg {
+    my $pkg = shift;
+    my $type = shift;
+    
+    debug(sprintf('Searching for package: ref=<%s>, pkg=<%s>', 
+      ref $pkg, $pkg));
+    
+    given (ref $pkg) {
+        when ('') {
+            return $pkg if ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
+        }
+        when ('HASH') {
+            my $pkg_name = $pkg->{$type} // $pkg->{default};
+            return $pkg_name if ($pkg_name =~ m/^[A-Za-z0-9\-\_\.]+$/);
+        }
+    }
+    
+    die('Invalid package');
+}
+
 1;
 __END__
-
-=head1 NAME
-
-Csistck::Test::Pkg - Csistck package check
-
-=head1 DESCRIPTION
-
-=head1 METHODS
-
-=head2 pkg($package, [$type])
-
-Test for existing package using forks to system package managers. In repair mode,
-install the package quietly. This is not an option for some package systems, such
-as ports and pkgsrc; these package managers will fail without attempting to install
-packages.
-
-Supported package types:
-
-=over
-
-=item dpkg
-
-Debian package management utility
-
-=item pacman
-
-Arch linux package management utility
-
-=item More planned..
-
-=back
 
 =head1 OPTIONS
 
@@ -160,19 +218,19 @@ Anthony Johnson, E<lt>anthony@ohess.orgE<gt>
 
 Copyright (c) 2011 Anthony Johnson
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 

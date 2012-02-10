@@ -12,6 +12,7 @@ our @EXPORT_OK = qw/
     backup_file
     hash_file
     hash_string
+    package_manager
 /;
 
 use Csistck::Oper qw/debug info/;
