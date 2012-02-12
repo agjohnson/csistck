@@ -12,6 +12,7 @@ WriteMakefile(
         'File::stat' => 0,
         'Getopt::Long' => 0,
         'Sys::Hostname::Long' => 0,
+        'Scalar::Util' => 0,
         'Linux::Distribution;' => 0,
         'Template' => 0,
         'Term::ReadKey' => 0,

@@ -17,13 +17,14 @@ sub new {
     bless($self, $class);
 
     # We won't add keys that overlap with required keys, 
-    # drop silently for now
+    # drop silently for now. Set up tests after
     $self->defaults();
     foreach my $key (keys ($args)) {
         $self->{$key} = $args->{$key}
           unless ($key =~ /^tests$/);
     }
-    
+    $self->tests();
+
     return $self;
 }
 
@@ -34,8 +35,8 @@ sub tests { return; };
 # Add test to object
 sub add {
     my $self = shift;
-    my $test = @_;
-    push(@{$self->{tests}}, $test);
+    my @tests = @_;
+    push(@{$self->{tests}}, @tests);
 }
 
 # Return tests
