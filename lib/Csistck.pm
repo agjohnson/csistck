@@ -162,6 +162,32 @@ Csistck is a small Perl framework for writing scripts to maintain system
 configuration and consistency. The focus of csistck is to stay lightweight,
 simple, and flexible.
 
+=head1 EXTENDING ROLES
+
+Roles can be defined using the C<role> keyword syntax, however a more flexible
+method is to extend a new object from L<Csistck::Role>:
+
+    use Csistck;
+    use base 'Csistck::Role';
+
+    sub defaults {
+        my $self = shift;
+        $self->{config} = '/etc/example.conf';
+    }
+
+    sub tests {
+        my $self = shift;
+        $self->add(pkg({
+            dpkg => 'test-server',
+            pkg_info => 'net-test'
+        }),
+        template('files/example.conf', $self->{config}, { example => $self });
+    }
+
+    1;
+
+See L<Csistck::Role> for information on extending roles
+
 =head1 METHODS
 
 =head2 option($name, $value)
@@ -185,7 +211,6 @@ domain_name [string]
 Set default domain name to append to hosts
 
 =back
-
 
 =head2 host($hostname, [@tests]);
 
@@ -234,9 +259,9 @@ See L<Csistck::Test::Template>
 Change permissions on files matching file glob pattern
 
     role 'test' => permission("/etc/couchdb/*", {
-      mode => '0640',
-      uid => 130,
-      gid => 130
+        mode => '0640',
+        uid => 130,
+        gid => 130
     });
 
 See L<Csistck::Test::Permission>
@@ -251,13 +276,20 @@ See L<Csistck::Test::Script>
 
 =head2 pkg($package, [$type])
 
-Check for package using system package manager.
+Check for package using system package manager. The C<package> argument may be
+specified as a string, or as a hashref to specify package names for multiple
+package managers. The package manager will be automatically detected if no
+package manager is specified.
 
     option 'pkg_type' => 'dpkg';
-    role 'test' => pkg("lighttpd");
+    role 'test' => 
+        pkg("lighttpd", 'dpkg'),
+        pkg({
+            dpkg => 'snmp-server',
+            pkg_info => 'net-snmp'
+        });
 
-See L<Csistck::Test::Pkg>
-
+See L<Csistck::Test::Pkg> for more information
 
 =head1 SCRIPT USAGE
 
@@ -294,28 +326,27 @@ Toggle event reporting of errors
 
 =head1 AUTHOR
 
-Anthony Johnson, E<lt>anthony@ohess.orgE<gt>
+Anthony Johnson, C<< <aj@ohess.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (c) 2011 Anthony Johnson
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 =cut
