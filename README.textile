@@ -26,6 +26,33 @@ h1. DESCRIPTION
 
 Csistck is a small Perl framework for writing scripts to maintain system configuration and consistency. The focus of csistck is to stay lightweight, simple, and flexible.
 
+h1. EXTENDING ROLES
+
+Roles can be defined using the @role@ keyword syntax, however a more flexible method is to extend a new object from Csistck::Role:
+
+<pre>
+    use Csistck;
+    use base 'Csistck::Role';
+
+    sub defaults {
+        my $self = shift;
+        $self->{config} = '/etc/example.conf';
+    }
+
+    sub tests {
+        my $self = shift;
+        $self->add(pkg({
+            dpkg => 'test-server',
+            pkg_info => 'net-test'
+        }),
+        template('files/example.conf', $self->{config}, { example => $self });
+    }
+
+    1;
+</pre>
+
+See Csistck::Role for information on extending roles
+
 h1. METHODS
 
 h2. option($name, $value)
@@ -97,9 +124,9 @@ Change permissions on files matching file glob pattern
 
 <pre>
     role 'test' => permission("/etc/couchdb/*", {
-      mode => '0640',
-      uid => 130,
-      gid => 130
+        mode => '0640',
+        uid => 130,
+        gid => 130
     });
 </pre>
 
@@ -117,14 +144,19 @@ See Csistck::Test::Script
 
 h2. pkg($package, [$type])
 
-Check for package using system package manager.
+Check for package using system package manager. The @package@ argument may be specified as a string, or as a hashref to specify package names for multiple package managers. The package manager will be automatically detected if no package manager is specified.
 
 <pre>
     option 'pkg_type' => 'dpkg';
-    role 'test' => pkg("lighttpd");
+    role 'test' => 
+        pkg("lighttpd", 'dpkg'),
+        pkg({
+            dpkg => 'snmp-server',
+            pkg_info => 'net-snmp'
+        });
 </pre>
 
-See Csistck::Test::Pkg
+See Csistck::Test::Pkg for more information
 
 h1. SCRIPT USAGE
 
@@ -145,7 +177,7 @@ Toggle event reporting of errors
 
 h1. AUTHOR
 
-Anthony Johnson, <anthony@ohess.org>
+Anthony Johnson, @<aj@ohess.org>@
 
 h1. COPYRIGHT AND LICENSE
 
