@@ -19,7 +19,7 @@ sub new {
     # We won't add keys that overlap with required keys, 
     # drop silently for now. Set up tests after
     $self->defaults();
-    foreach my $key (keys ($args)) {
+    foreach my $key (keys (%{$args})) {
         $self->{$key} = $args->{$key}
           unless ($key =~ /^tests$/);
     }
