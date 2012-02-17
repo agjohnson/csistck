@@ -189,11 +189,11 @@ sub get_pkg {
     
     given (ref $pkg) {
         when ('') {
-            return $pkg if ($pkg =~ m/^[A-Za-z0-9\-\_\.]+$/);
+            return $pkg if ($pkg =~ m/^[A-Za-z0-9\-\_\.\/]+$/);
         }
         when ('HASH') {
             my $pkg_name = $pkg->{$type} // $pkg->{default};
-            return $pkg_name if ($pkg_name =~ m/^[A-Za-z0-9\-\_\.]+$/);
+            return $pkg_name if ($pkg_name =~ m/^[A-Za-z0-9\-\_\.\/]+$/);
         }
     }
     
