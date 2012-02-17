@@ -15,7 +15,7 @@ use Digest::MD5;
 use File::Basename;
 use Linux::Distribution qw/distribution_name/;
 
-my $CMDS = {
+our $Cmds = {
     dpkg => {
         check => 'dpkg -L "%s"',
         diff => 'apt-get -s install "%s"',
@@ -27,7 +27,7 @@ my $CMDS = {
     },
     emerge => {
         check => 'equery -qC list "%s"',
-        diff => 'emerge --color n -pq "%s"'
+        diff => 'emerge --color n -pq "%s"',
         install => 'emerge --color n -q "%s"'
     },
     pacman => {
@@ -91,11 +91,11 @@ sub pkg {
     die("Bad package manager: manager=<$type>")
       if (! $type);
     die("Package manager not supported: type=<$type>")
-      if (! $CMDS->{$type});
+      if (! $Cmds->{$type});
     
     $pkg = get_pkg($pkgref, $type);
-    my $diff = sub { pkg_diff($pkg, $type); }
-      if ($CMDS->{$type}->{diff});
+    $diff = sub { pkg_diff($pkg, $type); }
+      if ($Cmds->{$type}->{diff});
     
     return Csistck::Test->new(
         check => sub { pkg_check($pkg, $type); },
@@ -107,7 +107,7 @@ sub pkg {
 
 sub pkg_check {
     my ($pkg, $type) = @_;
-    my $cmd = sprintf($CMDS->{$type}->{check}, $pkg) or
+    my $cmd = sprintf($Cmds->{$type}->{check}, $pkg) or
       die("Package check command missing: type=<$type>");
 
     debug("Searching for package via command: cmd=<$cmd>");    
@@ -120,7 +120,7 @@ sub pkg_check {
 # Package install
 sub pkg_install {
     my ($pkg, $type) = @_;
-    my $cmd = sprintf($CMDS->{$type}->{install}, $pkg) or
+    my $cmd = sprintf($Cmds->{$type}->{install}, $pkg) or
       die("Package install command missing: type=<$type>");
     
     $ENV{DEBIAN_FRONTEND} = "noninteractive";
@@ -134,7 +134,7 @@ sub pkg_install {
 # Package diff
 sub pkg_diff {
     my ($pkg, $type) = @_;
-    my $cmd = sprintf($CMDS->{$type}->{diff}, $pkg) or
+    my $cmd = sprintf($Cmds->{$type}->{diff}, $pkg) or
       die("Package diff command missing: type=<$type>");
     
     $ENV{DEBIAN_FRONTEND} = "noninteractive";
