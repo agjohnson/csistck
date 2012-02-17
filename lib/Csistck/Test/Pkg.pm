@@ -139,7 +139,7 @@ sub pkg_diff {
     
     $ENV{DEBIAN_FRONTEND} = "noninteractive";
     debug("Showing package differences via command: cmd=<$cmd>");
-    my $ret = system("$cmd 1>/dev/null 2>/dev/null");
+    my $ret = system("$cmd 2>/dev/null");
 
     die("Package differences query failed")
       unless ($ret == 0);
