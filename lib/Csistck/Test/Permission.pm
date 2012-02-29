@@ -22,7 +22,7 @@ sub permission {
      
     # Bad arguments
     die("Invalid arguments")
-      if (!defined %args);
+      if (! %args);
     
     # Return array of tests
     return map {
