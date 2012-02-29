@@ -20,27 +20,25 @@ sub permission {
     # Get glob of files
     my @files = glob($src);
      
-    # Return array of tests
-    return map { permission_build_test($src, \%args); } @files;
-}
-
-# Helper function to avoid same scope in map and to build test
-sub permission_build_test {
-    my ($src, $args) = @_;
-    
     # Bad arguments
     die("Invalid arguments")
-     if (!defined $args or !ref $args eq "HASH");
+      if (! %args);
     
+    # Return array of tests
+    return map { permission_build_test($_, \%args); } @files;
+}
+
+sub permission_build_test {
+    my ($file, $args) = @_;
     return Csistck::Test->new(
-        check => sub { permission_process($src, $args); },
-        repair => sub { permission_process($src, $args); },
-        desc => "Permission check on $_"
+        check => sub { permission_process(0, $file, $args); },
+        repair => sub { permission_process(1, $file, $args); },
+        desc => "Permission check on $file"
     );
 }
 
-# First is file, second call is hash of args
 sub permission_process {
+    my $repair = shift;
     my $file = shift;
     my $args = shift;
 
@@ -48,75 +46,61 @@ sub permission_process {
     die("Path not found")
       if (! -e $file);
     
-    # Run tests with arguments
-    # Check for mode
-    if (defined $args->{mode}) {
-        mode_process($file, $args->{mode});
-    }
-    
-    # Check for owner
-    if (defined $args->{uid}) {
-        uid_process($file, $args->{uid});
-    }
-
-    # Check for group
-    if (defined $args->{gid}) {
-        gid_process($file, $args->{gid});
-    }
+    mode_process($repair, $file, $args->{mode})
+      if (defined $args->{mode});
+    uid_process($repair, $file, $args->{uid})
+      if (defined $args->{uid});
+    gid_process($repair, $file, $args->{gid})
+      if (defined $args->{gid});
 }
 
 # Run test on file mode
 sub mode_process {
-    my ($file, $mode) = @_;
+    my ($repair, $file, $mode) = @_;
 
     # Check mode is legit
     die("Invalid file mode")
       if ($mode !~ m/^[0-7]{3,4}$/);
 
-    die("File mode does not match")
-      unless (mode_compare($file, $mode));
+    ($repair) ? mode_repair($file, $mode) : mode_check($file, $mode);
 }
 
 sub uid_process {
-    my ($file, $uid) = @_;
+    my ($repair, $file, $uid) = @_;
 
     # Check uid is legit
     die("Invalid user id")
       if ($uid !~ m/^[0-9]+$/);
 
-    # Run check, repair if fixing
-    die("File uid does not match")
-      unless (uid_compare($file, $uid));
+    ($repair) ? uid_repair($file, $uid) : uid_check($file, $uid);
 }
 
 sub gid_process {
-    my ($file, $gid) = @_;
+    my ($repair, $file, $gid) = @_;
 
     # Check gid is legit
     die("Invalid group id")
       if ($gid !~ m/^[0-9]+$/);
 
-    # Run check, repair if fixing
-    die("File gid does not match")
-      unless (gid_compare($file, $gid));
+    ($repair) ? gid_repair($file, $gid) : gid_check($file, $gid);
 }
 
 # Compare all files
-sub mode_compare {
+sub mode_check {
     my ($file, $mode) = @_;
     
-    # Don't accept honkey permissions
+    # Normalize permissions first
     $mode =~ s/^([0-7]{3})$/0$1/; 
 
+    # Return if file is found and permissions match
     my $fh = stat($file);
-
     if ($fh) {
         my $curmode = sprintf "%04o", $fh->mode & 07777;
         debug("File mode: file=<$file> mode=<$curmode>");
-        return ($curmode eq $mode);
+        return if ($curmode eq $mode);
     }
 
-    return 0;
+    die("Permission check failed: $file");
 }
 
 # Repair mode
@@ -124,25 +108,22 @@ sub mode_repair {
     my ($file, $mode) = @_;
 
     debug("Chmod file: file=<$file> mode=<$mode>");
-    
-    chmod(oct($mode), $file) or die("Failed to chmod file: $file") if (fix());
-
-    return
+    chmod(oct($mode), $file) or die("Failed to chmod file: $file");
 }
 
 # Compare uid
-sub uid_compare {
+sub uid_check {
     my ($file, $uid) = @_;
     
+    # Return if file is found and uid matches
     my $fh = stat($file);
-
     if ($fh) {
         my $curuid = $fh->uid;
         debug("File owner: file=<$file> uid=<$uid>");
-        return ($curuid == $uid);
+        return if ($curuid == $uid);
     }
 
-    return 0;
+    die("File ownership check failed: $file");
 }
 
 # Repair uid
@@ -150,25 +131,22 @@ sub uid_repair {
     my ($file, $uid) = @_;
 
     debug("Chown file: file=<$file> uid=<$uid>");
-    
-    chown($uid, -1, $file) or die("Failed to chown file: $file") if (fix());
-
-    return
+    chown($uid, -1, $file) or die("Failed to chown file: $file");
 }
 
 # Compare gid
-sub gid_compare {
+sub gid_check {
     my ($file, $gid) = @_;
     
+    # Return if file is found and gid matches
     my $fh = stat($file);
-
     if ($fh) {
         my $curgid = $fh->gid;
         debug("File group: file=<$file> gid=<$gid>");
-        return ($curgid == $gid);
+        return if ($curgid == $gid);
     }
 
-    return 0;
+    die("File group ownership failed: $file");
 }
 
 # Repair gid
@@ -176,13 +154,8 @@ sub gid_repair {
     my ($file, $gid) = @_;
 
     debug("Chown file: file=<$file> gid=<$gid>");
-    
-    chown(-1, $gid, $file) or die("Failed to chown file: $file") if (fix());
-
-    return
+    chown(-1, $gid, $file) or die("Failed to chown file: $file");
 }
-
-
 
 1;
 __END__
