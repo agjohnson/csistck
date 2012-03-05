@@ -164,9 +164,10 @@ where hostname is not important.
 sub check {
     my $target = shift // Sys::Hostname::Long::hostname_long();
 
-    # Process cli arguments for mode/etc
+    # Process cli arguments for mode/etc, usage
     Csistck::Oper::set_mode_by_cli();
-    
+    return if (Csistck::Oper::usage());
+
     # If target is a string, process as hostname reference. Otherwise, assume a
     # test object was passed
     if (!defined(reftype($target))) {
