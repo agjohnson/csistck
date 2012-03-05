@@ -26,7 +26,8 @@ our $Options = {
     verbose => 0,
     debug => 0,
     quiet => 0,
-    repair => 0
+    repair => 0,
+    help => 0
 };
 
 # Dynamic setup of reporting functions
@@ -70,6 +71,25 @@ sub set_mode_by_cli {
     $Modes->{info} = ($Options->{verbose}) ? 1 : 0;
     $Modes->{debug} = ($Options->{debug}) ? 1 : 0;
     $Modes->{error} = ($Options->{quiet}) ? 0 : 1;
+}
+
+# Display usage
+sub usage {
+    return undef unless ($Options->{help});
+    
+    print <<EOF;
+Usage: $0 [OPTION]...
+
+  Arguments:
+    
+    --help      Display usage
+    --verbose   Verbose output
+    --debug     Debug output
+    --repair    Run repair operations
+    --quiet     Less output
+
+EOF
+    return 1;
 }
 
 sub log_message {
