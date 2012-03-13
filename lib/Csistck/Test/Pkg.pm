@@ -33,6 +33,9 @@ our $Cmds = {
     pacman => {
         check => 'pacman -Qe "%s"',
         install => 'pacman -Sq --noconfirm "%s"'
+    },
+    pkg_info => {
+        check => 'pkg_info -Qq "%s>0"'
     }
 };
 
