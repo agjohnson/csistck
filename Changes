@@ -1,6 +1,12 @@
-Revision history for Perl extension Csistck.
-
-0.01  Thu Jan 27 14:57:13 2011
+Revision history for Csistck.
+ 
+ 0.08 3-14-2012
+     - Added base class for extending configurable roles
+     - More pkg test managers
+     - Basic colored output
+     - Fixed pkg and permission tests
+     - Updated POD and added CLI options
+ 0.01  Thu Jan 27 14:57:13 2011
 	- original version; created by h2xs 1.23 with options
 		-AXn Csistck
 

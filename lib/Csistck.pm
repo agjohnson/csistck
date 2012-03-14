@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.07_08';
+our $VERSION = '0.08';
 
 # We export function in the main namespace
 use base 'Exporter';
@@ -366,7 +366,7 @@ Anthony Johnson, C<< <aj@ohess.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2011 Anthony Johnson
+Copyright (c) 2011-2012 Anthony Johnson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
