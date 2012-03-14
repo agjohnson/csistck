@@ -12,7 +12,6 @@ lib/Csistck/Test/Script.pm
 lib/Csistck/Test/Permission.pm
 lib/Csistck/Test/NOOP.pm
 lib/Csistck/Test/Template.pm
-Makefile
 Makefile.PL
 MANIFEST
 README.textile
