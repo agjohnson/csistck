@@ -17,7 +17,7 @@ use File::Basename;
 # Conditionally use linux-only modules
 BEGIN {
     if ("$^O" eq "linux") {
-        require Linux::Distribution qw/distribution_name/;
+        require Linux::Distribution;
     }
 }
 
