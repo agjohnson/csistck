@@ -1,0 +1,5 @@
+*.tar.gz
+META*
+Makefile
+Makefile.old
+inc/
