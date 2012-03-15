@@ -13,7 +13,13 @@ use Csistck::Test;
 
 use Digest::MD5;
 use File::Basename;
-use Linux::Distribution qw/distribution_name/;
+
+# Conditionally use linux-only modules
+BEGIN {
+    if ("$^O" eq "linux") {
+        use Linux::Distribution qw/distribution_name/;
+    }
+}
 
 our $Cmds = {
     dpkg => {

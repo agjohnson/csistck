@@ -21,10 +21,14 @@ requires 'File::stat';
 requires 'Getopt::Long';
 requires 'Sys::Hostname::Long';
 requires 'Scalar::Util';
-requires 'Linux::Distribution' => '0.21';
 requires 'Template';
 requires 'Term::ReadKey';
 requires 'Text::Diff';
 requires 'Test::Exception';
+
+# This module fails on !Linux
+if ("$^O" eq "linux") {
+    requires 'Linux::Distribution' => '0.21';
+}
 
 WriteAll;
