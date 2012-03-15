@@ -1,0 +1,7 @@
+\.hg
+\.git
+MYMETA
+^Makefile.old$
+^Makefile$
+^MANIFEST\.
+.bak$
