@@ -173,7 +173,7 @@ sub detect_pkg_manager {
         when (/^freebsd$/) { return 'pkg_info'; }
         when (/^netbsd$/) { return 'pkg_info'; }
         when (/^linux$/) { 
-            given (distribution_name()) {
+            given (Linux::Distribution::distribution_name()) {
                 when (/^(?:debian|ubuntu)$/) { return 'dpkg'; }
                 when (/^(?:fedora|redhat|centos)$/) { return 'rpm'; }
                 when (/^gentoo$/) { return 'emerge'; }
