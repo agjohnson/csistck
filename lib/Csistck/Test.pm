@@ -4,6 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
+use base 'Exporter';
 use Csistck::Oper;
 
 sub new {
@@ -11,18 +12,12 @@ sub new {
     my %args = @_;
     my $args = \%args;
     
-    # Require both functions
-    die ("Check subroutine not specified")
-      unless (defined $args->{check});
-    die ("Repair subroutine not specified")
-      unless (defined $args->{repair});
-
     # Build Test object to bless and return
     my $self = {};
-    $self->{CHECK} = $args->{check};
-    $self->{REPAIR} = $args->{repair};
-    $self->{DIFF} = $args->{diff} // undef;
-    $self->{DESC} = $args->{desc} // "Unidentified test";
+    $self->{CHECK} = sub { };
+    $self->{REPAIR} = sub { };
+    $self->{DIFF} = undef;
+    $self->{DESC} = "Unidentified test";
     bless $self, $class;
     return $self;
 }

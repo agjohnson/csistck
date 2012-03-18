@@ -4,12 +4,11 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Exporter';
-our @EXPORT_OK = qw/template/;
-
+use base 'Csistck::Test';
 use Csistck::Oper qw/debug/;
 use Csistck::Util qw/backup_file hash_file hash_string/;
-use Csistck::Test;
+
+our @EXPORT_OK = qw/template/;
 
 use Template;
 use File::Copy;
@@ -17,7 +16,11 @@ use Sys::Hostname::Long qw//;
 use FindBin;
 use Text::Diff ();
 
-sub template {
+sub template { Csistck::Test::Template->new($_); };
+
+sub new {
+    my $class = shift;
+    my $self = $class->SUPER::new();
     my $template = shift;
     my $dest = shift;
     my $args = shift // {};
@@ -37,12 +40,13 @@ sub template {
         %{$args}
     };
 
-    return Csistck::Test->new(
-      check => sub { template_check($abs_tpl, $dest, $args_add); },
-      repair => sub { template_install($abs_tpl, $dest, $args_add); },
-      diff => sub { template_diff($abs_tpl, $dest, $args_add); },
-      desc => "Process template $template for destination $dest"
-    );
+    $self->{CHECK} = sub { template_check($abs_tpl, $dest, $args_add); };
+    $self->{REPAIR} = sub { template_install($abs_tpl, $dest, $args_add); };
+    $self->{DIFF} = sub { template_diff($abs_tpl, $dest, $args_add); };
+    $self->{DESC} = "Process template $template for destination $dest";
+
+    bless($self, $class);
+    return $self;
 }
 
 sub template_check {

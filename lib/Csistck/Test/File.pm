@@ -4,12 +4,11 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Exporter';
-our @EXPORT_OK = qw/file/;
-
+use base 'Csistck::Test';
 use Csistck::Oper qw/debug/;
 use Csistck::Util qw/backup_file hash_file/;
-use Csistck::Test;
+
+our @EXPORT_OK = qw/file/;
 
 use Digest::MD5;
 use File::Basename;
@@ -26,23 +25,26 @@ sub file {
     my @files = glob($src_abs);
     
     # Return array of tests
-    return map { file_build_test($_, $dest); } @files;
+    return map { Csistck::Test::File->new($_, $dest, $args); } @files;
 }
 
 # Helper function to avoid same scope in map and to build test
-sub file_build_test {
-    my ($src, $dest) = @_;
-    
+sub new {
+    my ($class, $src, $dest, $args) = @_;
+    my $self = $class->SUPER::new();
+    # TODO handle args here
+
     # Test destination for file
     my $src_base = basename($src);
     my $dest_abs = join "/", $dest, $src_base;
 
-    return Csistck::Test->new(
-        check => sub { file_check($src, $dest_abs); },
-        repair => sub { file_install($src, $dest_abs); },
-        diff => sub { file_diff($src, $dest_abs); },
-        desc => "File check on $src"
-    );
+    $self->{CHECK} = sub { file_check($src, $dest_abs); };
+    $self->{REPAIR} = sub { file_install($src, $dest_abs); };
+    $self->{DIFF} = sub { file_diff($src, $dest_abs); };
+    $self->{DESC} = "File check on $src";
+    
+    bless($self, $class);
+    return $self;
 }
 
 # Check file and file in destination are the same via md5

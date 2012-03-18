@@ -196,20 +196,20 @@ sub process {
         when ("CODE") {
             &{$obj};
         }
-        when ("Csistck::Test") {
-            # Check is mandatory, if auto repair is set, repair, otherwise prompt
-            if (!$obj->check()) {
-                if (Csistck::Oper::repair()) {
-                    $obj->repair()
-                }
-                else {
-                    Csistck::Term::prompt($obj);
+        default {
+            if (blessed($obj) and $obj->isa('Csistck::Test')) {
+                # Check is mandatory, if auto repair is set, repair, otherwise prompt
+                if (!$obj->check()) {
+                    if (Csistck::Oper::repair()) {
+                        $obj->repair()
+                    }
+                    else {
+                        Csistck::Term::prompt($obj);
+                    }
                 }
             }
-        }
-        default {
-            # Object might be subclass of Csistck::Role
-            if (blessed($obj) and $obj->isa('Csistck::Role')) {
+            elsif (blessed($obj) and $obj->isa('Csistck::Role')) {
+                # Object might be subclass of Csistck::Role
                 foreach my $subobj (@{$obj->get_tests()}) {
                     process($subobj);
                 }

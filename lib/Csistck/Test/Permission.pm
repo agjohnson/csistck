@@ -4,11 +4,10 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Exporter';
-our @EXPORT_OK = qw/permission/;
-
+use base 'Csistck::Test';
 use Csistck::Oper qw/debug/;
-use Csistck::Test;
+
+our @EXPORT_OK = qw/permission/;
 
 use File::stat;
 
@@ -25,16 +24,19 @@ sub permission {
       if (! %args);
     
     # Return array of tests
-    return map { permission_build_test($_, \%args); } @files;
+    return map { Csistck::Test::Permission->new($_, \%args); } @files;
 }
 
-sub permission_build_test {
-    my ($file, $args) = @_;
-    return Csistck::Test->new(
-        check => sub { permission_process(0, $file, $args); },
-        repair => sub { permission_process(1, $file, $args); },
-        desc => "Permission check on $file"
-    );
+sub new {
+    my ($class, $file, $args) = @_;
+    my $self = $class->SUPER::new();
+
+    $self->{CHECK} = sub { permission_process(0, $file, $args); };
+    $self->{REPAIR} = sub { permission_process(1, $file, $args); };
+    $self->{DESC} = "Permission check on $file";
+
+    bless($self, $class);
+    return $self;
 }
 
 sub permission_process {

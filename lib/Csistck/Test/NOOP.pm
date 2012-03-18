@@ -4,14 +4,15 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Exporter';
+use base 'Csistck::Test';
+use Csistck::Oper;
 our @EXPORT_OK = qw/noop/;
 
-use Csistck::Oper;
-use Csistck::Test;
+sub noop { Csistck::Test::NOOP->new($_); };
 
-sub noop {
-    my $args = shift;
+sub new {
+    my ($class, $args) = @_;
+    my $self = $class->SUPER::new();
     my $result = undef;
 
     # Set result
@@ -24,11 +25,12 @@ sub noop {
         $result = $args;
     }
 
-    return Csistck::Test->new(
-        check => sub { noop_check($result); },
-        repair => sub { noop_check($result); },
-        desc => "NOOP test"
-    );
+    $self->{CHECK} = sub { noop_check($result); };
+    $self->{REPAIR} = sub { noop_check($result); };
+    $self->{DESC} = "NOOP test";
+
+    bless($self, $class);
+    return $self;
 }
 
 sub noop_check {

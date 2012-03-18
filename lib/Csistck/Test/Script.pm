@@ -4,12 +4,11 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Exporter';
-our @EXPORT_OK = qw/script/;
-
+use base 'Csistck::Test';
 use Csistck::Oper qw/debug/;
 use Csistck::Config qw/option/;
-use Csistck::Test;
+
+our @EXPORT_OK = qw/script/;
 
 use Digest::MD5;
 use File::Basename;
@@ -18,15 +17,19 @@ use FindBin;
 use constant MODE_CHECK => 'check';
 use constant MODE_RUN => 'run';
 
-sub script {
-    my $script = shift;
+sub script { Csistck::Test::Script->new($_); };
+
+sub new {
+    my ($class, $script) = @_;
+    my $self = $class->SUPER::new();
     my @args = @_;
 
-    return Csistck::Test->new(
-        check => sub { script_run(MODE_CHECK, $script, @args); },
-        repair => sub { script_run(MODE_RUN, $script, @args); },
-        desc => "Executing script $script"
-    );
+    $self->{CHECK} = sub { script_run(MODE_CHECK, $script, @args); };
+    $self->{REPAIR} = sub { script_run(MODE_RUN, $script, @args); };
+    $self->{DESC} = "Executing script $script";
+
+    bless($self, $class);
+    return $self;
 }
 
 sub script_run {

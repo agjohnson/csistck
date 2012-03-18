@@ -4,12 +4,11 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Exporter';
-our @EXPORT_OK = qw/pkg/;
-
+use base 'Csistck::Test';
 use Csistck::Oper qw/debug/;
 use Csistck::Config qw/option/;
-use Csistck::Test;
+
+our @EXPORT_OK = qw/pkg/;
 
 use Digest::MD5;
 use File::Basename;
@@ -87,9 +86,11 @@ Arch linux package management utility
 
 =cut 
 
-sub pkg {
-    my $pkgref = shift;
-    my $type = shift;
+sub pkg { Csistck::Test::Pkg->new($_); };
+
+sub new {
+    my ($class, $pkgref, $type) = @_;
+    my $self = $class->SUPER::new();
     my $pkg;
     my $diff;
 
@@ -106,12 +107,13 @@ sub pkg {
     $diff = sub { pkg_diff($pkg, $type); }
       if ($Cmds->{$type}->{diff});
     
-    return Csistck::Test->new(
-        check => sub { pkg_check($pkg, $type); },
-        repair => sub { pkg_install($pkg, $type); },
-        diff => $diff,
-        desc => "Searching for package $pkg, using $type"
-    );
+    $self->{CHECK} = sub { pkg_check($pkg, $type); };
+    $self->{REPAIR} = sub { pkg_install($pkg, $type); };
+    $self->{DIFF} = $diff;
+    $self->{DESC} = "Searching for package $pkg, using $type";
+
+    bless($self, $class);
+    return $self;
 }
 
 sub pkg_check {
