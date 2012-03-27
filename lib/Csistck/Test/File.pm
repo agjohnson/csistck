@@ -4,9 +4,9 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Csistck::Test';
+use base 'Csistck::Test::FileBase';
 use Csistck::Oper qw/debug/;
-use Csistck::Util qw/backup_file hash_file/;
+use Csistck::Util qw/hash_file hash_string/;
 
 our @EXPORT_OK = qw/file/;
 
@@ -14,84 +14,50 @@ use Digest::MD5;
 use File::Basename;
 use File::Copy;
 use FindBin;
+use File::stat;
+use Template;
+use Sys::Hostname::Long qw//;
+use Text::Diff ();
 
-sub file {
-    my $src = shift;
-    my $dest = shift;
-    my $args = shift;
+sub file { Csistck::Test::File->new(@_); };
 
-    # Get absolute paths for glob, glob files
-    my $src_abs = join '/', $FindBin::Bin, $src;
-    my @files = glob($src_abs);
-    
-    # Return array of tests
-    return map { Csistck::Test::File->new($_, $dest, $args); } @files;
-}
+sub desc { sprintf("File check on %s", $_[0]->dest); }
 
-# Helper function to avoid same scope in map and to build test
-sub new {
-    my ($class, $src, $dest, $args) = @_;
-    my $self = $class->SUPER::new();
-    # TODO handle args here
-
-    # Test destination for file
-    my $src_base = basename($src);
-    my $dest_abs = join "/", $dest, $src_base;
-
-    $self->{CHECK} = sub { file_check($src, $dest_abs); };
-    $self->{REPAIR} = sub { file_install($src, $dest_abs); };
-    $self->{DIFF} = sub { file_diff($src, $dest_abs); };
-    $self->{DESC} = "File check on $src";
-    
-    bless($self, $class);
-    return $self;
-}
-
-# Check file and file in destination are the same via md5
 sub file_check {
-    my $src = shift;
-    my $dest = shift;
-
+    my $self = shift;
+    my $dest = $self->dest;
+    my $src = $self->src;
+    
     die("Files do not match: src=<$src> dest=<$dest>")
       unless(file_compare($src, $dest));
 }
 
-# Copy file to destination
-sub file_install {
-    my ($src, $dest) = @_;
+sub file_repair {
+    my $self = shift;
+    my $dest = $self->dest;
+    my $src = $self->src;
     
-    backup_file($dest)
-      if(-f -e -r $dest);
-
     debug("Copying file: <src=$src> <dest=$dest>");
-
-    copy($src, $dest) or die("Failed to copy file: $!: src=<$src> dest=<$dest>");
+    copy($src, $dest) or 
+      die("Failed to copy file: $!: src=<$src> dest=<$dest>");
 }
-
-# Diff for files
+    
 sub file_diff {
-    my ($src, $dest) = @_;
-
-    if(-f -e -r $dest) {
-        say(Text::Diff::diff($dest, $src));
-    }
-    else {
-        die("Destination file does not exist: dest=<$dest>");
-    };
+    my $self = shift;
+    my $dest = $self->dest;
+    my $src = $self->src;
+    
+    say(Text::Diff::diff($dest, $src));
 }
 
 # Compare hashes between two files
 sub file_compare {
     my @files = @_;
-
-    # Require two files
     return 0 unless (scalar @files == 2);
-
+    
     # Get hashes and return compare
     my ($hasha, $hashb) = map hash_file($_), @files;
-
     debug(sprintf "File compare result: <hash=%s> <hash=%s>", $hasha, $hashb);
-    
     return ($hasha eq $hashb);
 }
 
@@ -100,16 +66,28 @@ __END__
 
 =head1 NAME
 
-Csistck::Test::File - Csistck file check
+Csistck::Test::Template - Csistck template check
 
 =head1 DESCRIPTION
 
 =head1 METHODS
 
-=head2 file($glob, $target)
+=head2 template($template, $target, [%args])
 
-Select files using file glob pattern and copy files into target path. Target
-path should be a directory, not a file.
+Process template toolkit file and output to target path. Target
+path should be a file in an existing path. 
+
+    role 'test' => template('sys/motd.tt', '/etc/motd', { production => 1 });
+
+Some arguments are automatically passed to the template processor:
+
+=over
+
+=item hostname
+
+The full hostname of the current system
+
+=back
 
 =head1 AUTHOR
 
@@ -138,4 +116,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 =cut
+
 

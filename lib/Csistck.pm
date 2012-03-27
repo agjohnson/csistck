@@ -16,7 +16,6 @@ our @EXPORT = qw(
 
     file
     noop
-    permission
     pkg
     script
     template
@@ -26,7 +25,6 @@ our @EXPORT = qw(
 use Csistck::Config qw/option/;
 use Csistck::Test::NOOP qw/noop/;
 use Csistck::Test::File qw/file/;
-use Csistck::Test::Permission qw/permission/;
 use Csistck::Test::Pkg qw/pkg/;
 use Csistck::Test::Script qw/script/;
 use Csistck::Test::Template qw/template/;
@@ -199,9 +197,9 @@ sub process {
         default {
             if (blessed($obj) and $obj->isa('Csistck::Test')) {
                 # Check is mandatory, if auto repair is set, repair, otherwise prompt
-                if (!$obj->check()) {
+                if (!$obj->execute('check')) {
                     if (Csistck::Oper::repair()) {
-                        $obj->repair()
+                        $obj->execute('repair');
                     }
                     else {
                         Csistck::Term::prompt($obj);

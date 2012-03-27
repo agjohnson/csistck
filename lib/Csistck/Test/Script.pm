@@ -15,27 +15,26 @@ use File::Basename;
 use FindBin;
 
 use constant MODE_CHECK => 'check';
-use constant MODE_RUN => 'run';
+use constant MODE_REPAIR => 'run';
 
-sub script { Csistck::Test::Script->new($_); };
-
-sub new {
-    my ($class, $script) = @_;
-    my $self = $class->SUPER::new();
-    my @args = @_;
-
-    $self->{CHECK} = sub { script_run(MODE_CHECK, $script, @args); };
-    $self->{REPAIR} = sub { script_run(MODE_RUN, $script, @args); };
-    $self->{DESC} = "Executing script $script";
-
-    bless($self, $class);
-    return $self;
+# Use the convenience function to normalize args
+sub script {
+    my ($script, $args) = @_;
+    Csistck::Test::Script->new($script, args => $args);
 }
 
-sub script_run {
+sub script_name { $_[0]->{target}; }
+sub args { $_[0]->{args}; }
+
+# Wrap common process function
+sub check { $_[0]->process(MODE_CHECK); }
+sub repair { $_[0]->process(MODE_REPAIR); }
+
+sub process {
+    my $self = shift;
     my $mode = shift;
-    my $script = shift;
-    my @args = @_;
+    my $script = $self->script_name;
+    my @args = $self->args;
 
     # TODO sanity check on script
 

@@ -23,7 +23,7 @@ sub prompt {
     say("What would you like to:");
     my @choices = ();
     # Repair
-    if ($test->has_repair()) {
+    if ($test->can('repair')) {
         say("  Y : Repair");
         push(@choices, 'Y');
     }
@@ -31,7 +31,7 @@ sub prompt {
     say("  N : Skip");
     push(@choices, 'n');
     # DIff
-    if ($test->has_diff()) {
+    if ($test->can('diff')) {
         say("  D : Diff");
         push(@choices, 'd');
     }
@@ -44,11 +44,11 @@ sub prompt {
     
     given ($action) {
         when (/[Yy\n]/) { 
-            $test->repair() if ($test->has_repair());
+            $test->execute('repair') if ($test->can('repair'));
         }
         when (/[Dd]/) { 
             # Show diff, loop through prompt again
-            $test->diff() if ($test->has_diff());
+            $test->execute('diff') if ($test->can('diff'));
             prompt($test);
         }
         default {}

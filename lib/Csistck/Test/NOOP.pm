@@ -6,37 +6,14 @@ use warnings;
 
 use base 'Csistck::Test';
 use Csistck::Oper;
+
 our @EXPORT_OK = qw/noop/;
 
-sub noop { Csistck::Test::NOOP->new($_); };
+sub noop { Csistck::Test::NOOP->new(@_); };
 
-sub new {
-    my ($class, $args) = @_;
-    my $self = $class->SUPER::new();
-    my $result = undef;
-
-    # Set result
-    if (ref $args eq "HASH") {
-        if (defined $args->{result}) {
-            $result = $args->{result};
-        }
-    } 
-    else {
-        $result = $args;
-    }
-
-    $self->{CHECK} = sub { noop_check($result); };
-    $self->{REPAIR} = sub { noop_check($result); };
-    $self->{DESC} = "NOOP test";
-
-    bless($self, $class);
-    return $self;
-}
-
-sub noop_check {
-    my $result = shift;
-
-    die("Set to failure") unless ($result);
+sub check {
+    my $self = shift;
+    die("Set to failure") unless ($self->target);
 }
 
 1;

@@ -9,99 +9,44 @@ use Csistck::Oper;
 
 sub new {
     my $class = shift;
-    my %args = @_;
-    my $args = \%args;
-    
-    # Build Test object to bless and return
-    my $self = {};
-    $self->{CHECK} = sub { };
-    $self->{REPAIR} = sub { };
-    $self->{DIFF} = undef;
-    $self->{DESC} = "Unidentified test";
-    bless $self, $class;
-    return $self;
+    my $target = shift;
+
+    bless {
+        desc => "Unidentified test",
+        target => $target,
+        @_
+    }, $class;
 }
 
-# Check, use eval to catch fatal errors in test
-sub check {
-    my $self = shift;
+sub desc { $_[0]->{desc}; }
+sub target { $_[0]->{target}; }
 
-    die ("Not a code reference")
-      unless (ref $self->{CHECK} eq "CODE");
+# This is used to wrap processes
+sub execute {
+    my ($self, $mode) = @_;
     
-    # Execute code reference in eval, return response
-    Csistck::Oper::info("$self->{DESC}");
-    eval { &{$self->{CHECK}}; };
+    # We will exit with pass here, as to not throw an error. It is not the fault
+    # of the user if the test has no check or repair operation
+    my $func = sub {};
+    return 1 unless ($self->can($mode));
+    given ($mode) {
+        when ("check") { $func = sub { $self->check } if ($self->can('check')); }
+        when ("repair") { $func = sub { $self->repair } if ($self->can('repair')); }
+        when ("diff") { $func = sub { $self->diff } if ($self->can('diff')); }
+    }
 
+    Csistck::Oper::info($self->desc);
+    eval { &{$func}; };
+    
     if ($@) {
         my $error = $@;
         $error =~ s/ at [A-Za-z0-9\/\_\-\.]+ line [0-9]+.\n//;
-        Csistck::Oper::error("$self->{DESC}: $error");
+        Csistck::Oper::error(sprintf("%s: %s", $self->desc, $error));
         return 0;
     }
     else {
         return 1;
     }   
-}
-
-# Repair, use eval to catch fatal errors in repair
-sub repair {
-    my $self = shift;
-
-    die ("Not a code reference")
-      unless ($self->has_repair());
-    
-    # Execute code reference in eval, return response
-    Csistck::Oper::info("Repairing $self->{DESC}");
-    eval { &{$self->{REPAIR}}; };
-
-    if ($@) {
-        my $error = $@;
-        $error =~ s/ at [A-Za-z0-9\/\_\-\.]+ line [0-9]+.\n//;
-        Csistck::Oper::error("Repairing $self->{DESC}: $error");
-        return 0;
-    }
-    else {
-        return 1;
-    }   
-}
-
-# Returns if test object has proper repair action
-sub has_repair {
-    my $self = shift;
-
-    return 1
-      if (ref $self->{REPAIR} eq 'CODE');
-
-    return 0;
-}
-
-# Diff, show some form of diff for interactive mode
-sub diff {
-    my $self = shift;
-
-    # No diff code defined
-    unless (defined $self->{DIFF}) {
-        return 1;
-    }
-
-    die ("Not a code reference")
-      unless ($self->has_diff());
-
-    # Execute code reference in eval, return response
-    eval { &{$self->{DIFF}}; };
-
-    return 1;
-}
-
-# Returns if test object has proper diff action
-sub has_diff {
-    my $self = shift;
-
-    return 1
-      if (ref $self->{DIFF} eq 'CODE');
-
-    return 0;
 }
 
 1;

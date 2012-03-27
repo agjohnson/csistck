@@ -7,6 +7,7 @@ use warnings;
 use base 'Exporter';
 use FindBin;
 use File::Copy;
+use File::Temp;
 
 our @EXPORT_OK = qw/
     backup_file
@@ -31,12 +32,17 @@ sub backup_file {
     die("Backup path is not writable: path=<$dest_base>")
       if (-e $dest_base and ! -w $dest_base);    
     
-    # Get file hash, use this is a file name to copy to
-    my $hash = hash_file($file);
-    my $dest = join '/', $dest_base, $hash;
+    # Generate temporary file to backup to using mangled path
+    my $tmp_template = $file;
+    $tmp_template =~ s/\W/_/g;
+    $tmp_template .= "-XXXXXX";
+    my $tmp = File::Temp->new(
+        TEMPLATE => $tmp_template,
+        DIR => $dest_base
+    );
+    my $dest = $tmp->filename;
 
     copy($file, $dest) or die("Backup failed: $!: file=<$file> dest=<$dest>");
-
     info("Backup succeeded: file=<$file> dest=<$dest>");
 }
 

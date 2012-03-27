@@ -4,9 +4,9 @@ use 5.010;
 use strict;
 use warnings;
 
-use base 'Csistck::Test';
+use base 'Csistck::Test::FileBase';
 use Csistck::Oper qw/debug/;
-use Csistck::Util qw/backup_file hash_file hash_string/;
+use Csistck::Util qw/hash_file hash_string/;
 
 our @EXPORT_OK = qw/template/;
 
@@ -16,114 +16,63 @@ use Sys::Hostname::Long qw//;
 use FindBin;
 use Text::Diff ();
 
-sub template { Csistck::Test::Template->new($_); };
+sub template { Csistck::Test::Template->new(@_); };
 
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new();
-    my $template = shift;
-    my $dest = shift;
-    my $args = shift // {};
+sub desc { sprintf("Template check for destination %s", $_[0]->dest); }
 
-    # Die on invalid arguments
-    die("Invalid template name")
-      unless($template =~ /^[A-Za-z0-9\-\_][A-Za-z0-9\/\-\_\.]+$/);
-    die("Destination not specified")
-      unless(defined $dest);
-    
-    # Get full template path, return Test
-    my $abs_tpl = get_absolute_template($template);
-
-    # Add automatic arguments
-    my $args_add = {
-        hostname => Sys::Hostname::Long::hostname_long(),
-        %{$args}
-    };
-
-    $self->{CHECK} = sub { template_check($abs_tpl, $dest, $args_add); };
-    $self->{REPAIR} = sub { template_install($abs_tpl, $dest, $args_add); };
-    $self->{DIFF} = sub { template_diff($abs_tpl, $dest, $args_add); };
-    $self->{DESC} = "Process template $template for destination $dest";
-
-    bless($self, $class);
-    return $self;
-}
-
-sub template_check {
-    my ($template, $dest, $args) = @_;
+sub file_check {
+    my $self = shift;
     my $tplout;
 
-    template_file($template, \$tplout, $args)
-      or die("Template file not processed: template=<$template>");
+    $self->template_file(\$tplout)
+      or die("Template file not processed: template=<${\$self->src}>");
     
     my $hashsrc = hash_string($tplout);
-    my $hashdst = hash_file($dest);
+    my $hashdst = hash_file($self->dest);
     
     die("Template output does not match destination")
       unless(defined $hashsrc and defined $hashdst and ($hashsrc eq $hashdst));
 }
 
-sub template_install {
-    my ($template, $dest, $args) = @_;
-
-    # Try to catch some errors
-    if (-e $dest) {
-        die("Destination $dest exists and is not a file")
-          if (-d $dest);
-        die("Destination $dest exists is is not writable")
-          if (-f $dest and ! -w $dest);
-    }
-        
-    # Backup file
-    backup_file($dest)
-      if (-f -e -r $dest);
-
-    debug("Output template: template=<$template> dest=<$dest>");
-
-    open(my $h, '>', $dest) 
+sub file_repair {
+    my $self = shift;
+    debug(sprintf("Output template: template=<%s> dest=<%s>",
+      $self->src, $self->dest));
+    # TODO tmp file for template
+    open(my $h, '>', $self->dest) 
       or die("Permission denied writing template");
-    template_file($template, $h, $args);
+    $self->template_file($h);
     close($h);
 }
 
-sub template_diff {
-    my ($template, $dest, $args) = @_;
-
-    # Try to catch some errors
-    if (-e $dest) {
-        die("Destination exists and is not a file: dest=<$dest>")
-          if (-d $dest);
-        die("Destination exists is is not writable: dest=<$dest>")
-          if (-f $dest and ! -w $dest);
-    }
-    else {
-        die("Destination file does not exist: dest=<$dest>");
-    }
-        
-    if (-f -e -r $dest) {
-        my $temp_h;
-        template_file($template, \$temp_h, $args);
-        say(Text::Diff::diff($dest, \$temp_h));
-    }
+sub file_diff {
+    my $self = shift;
+    my $temp_h;
+    # TODO prune args in common function
+    $self->template_file(\$temp_h);
+    say(Text::Diff::diff($self->dest, \$temp_h));
 }
 
 # Processing absoulte template name and outputs to reference
 # variable $out. Die on error or unreadable template file
 sub template_file {
-    my $file = shift;
-    my $out = shift;
-    my $args = shift;
+    my ($self, $out) = @_;
     
-    # Create Template object, no config for now
+    die("Invalid template name")
+      unless($self->src =~ /^[A-Za-z0-9\-\_][A-Za-z0-9\/\-\_\.]+$/);
+    
+    # Build object, finish checks
     my $t = Template->new();
-    
+    my $file = get_absolute_template($self->src);
+    $self->{hostname} = Sys::Hostname::Long::hostname_long();
     die("Template not found")
       if(! -e $file);
     die("Permission denied reading template")
       if(! -r $file);
 
+    # Create Template object, no config for now
     open(my $h, $file);
-    $t->process($h, $args, $out) or die $t->error();
+    $t->process($h, $self, $out) or die $t->error();
     close($h);
 }
 

@@ -86,15 +86,21 @@ Arch linux package management utility
 
 =cut 
 
-sub pkg { Csistck::Test::Pkg->new($_); };
+# Use the convenience function to normalize args
+sub pkg {
+    my ($pkg, $args) = @_;
+    my $t_args = (ref($args) eq "HASH") ? $args : { type => $args };
+    Csistck::Test::Pkg->new($pkg, $t_args);
+}
 
 sub new {
-    my ($class, $pkgref, $type) = @_;
-    my $self = $class->SUPER::new();
-    my $pkg;
-    my $diff;
+    my $class = shift;
+    my $self = $class->SUPER::new(@_);
+    bless($self, $class);
 
+    # We'll fix package name here, instead of redoing each call
     # Priority: 'type' argument, 'pkg_type' option, detect_pkg_manager.
+    my $type = $self->{type};
     if (! $type) {
         $type = option('pkg_type') // detect_pkg_manager();
     }
@@ -102,22 +108,20 @@ sub new {
       if (! $type);
     die("Package manager not supported: type=<$type>")
       if (! $Cmds->{$type});
-    
-    $pkg = get_pkg($pkgref, $type);
-    $diff = sub { pkg_diff($pkg, $type); }
-      if ($Cmds->{$type}->{diff});
-    
-    $self->{CHECK} = sub { pkg_check($pkg, $type); };
-    $self->{REPAIR} = sub { pkg_install($pkg, $type); };
-    $self->{DIFF} = $diff;
-    $self->{DESC} = "Searching for package $pkg, using $type";
+    $self->{type} = $type;
 
-    bless($self, $class);
     return $self;
 }
 
-sub pkg_check {
-    my ($pkg, $type) = @_;
+sub desc {
+    return sprintf("Package test for %s, using %s", 
+      $_[0]->pkg_name, $_[0]->pkg_type);
+}
+
+sub check {
+    my $self = shift;
+    my $pkg = $self->pkg_name;
+    my $type = $self->pkg_type;
     my $cmd = sprintf($Cmds->{$type}->{check}, $pkg) or
       die("Package check command missing: type=<$type>");
 
@@ -128,9 +132,10 @@ sub pkg_check {
       unless($ret == 0);
 }
 
-# Package install
-sub pkg_install {
-    my ($pkg, $type) = @_;
+sub repair {
+    my $self = shift;
+    my $pkg = $self->pkg_name;
+    my $type = $self->pkg_type;
     my $cmd;
 
     if (defined $Cmds->{$type}->{install}) {
@@ -149,10 +154,18 @@ sub pkg_install {
 }
 
 # Package diff
-sub pkg_diff {
-    my ($pkg, $type) = @_;
-    my $cmd = sprintf($Cmds->{$type}->{diff}, $pkg) or
-      die("Package diff command missing: type=<$type>");
+sub diff {
+    my $self = shift;
+    my $pkg = $self->pkg_name;
+    my $type = $self->pkg_type;
+    my $cmd;
+    
+    if (defined $Cmds->{$type}->{diff}) {
+        $cmd = sprintf($Cmds->{$type}->{diff}, $pkg);
+    }
+    else {
+        die("Package diff command missing: type=<$type>");
+    }
     
     $ENV{DEBIAN_FRONTEND} = "noninteractive";
     debug("Showing package differences via command: cmd=<$cmd>");
@@ -171,6 +184,7 @@ used for the package test.
 =cut
 
 sub detect_pkg_manager {
+    my $self = shift;
     given ("$^O") {
         when (/^freebsd$/) { return 'pkg_info'; }
         when (/^netbsd$/) { return 'pkg_info'; }
@@ -188,7 +202,7 @@ sub detect_pkg_manager {
     }
 }
 
-=head2 get_pkg($package, $type)
+=head2 pkg_name($package, $type)
 
 Based on input package, return package name. With OS and distribution detection,
 $package can be passed as a string or a hashref.
@@ -197,13 +211,11 @@ See pkg() for information on passing hashrefs as package name
 
 =cut
 
-sub get_pkg {
-    my $pkg = shift;
-    my $type = shift;
-    
-    debug(sprintf('Searching for package: ref=<%s>, pkg=<%s>', 
-      ref $pkg, $pkg));
-    
+sub pkg_name {
+    my $self = shift;
+    my $pkg = $self->{target};
+    my $type = $self->{type};
+
     given (ref $pkg) {
         when ('') {
             return $pkg if ($pkg =~ m/^[A-Za-z0-9\-\_\.\/]+$/);
@@ -216,6 +228,14 @@ sub get_pkg {
     
     die('Invalid package');
 }
+
+=head2 pkg_type()
+
+Return fixed package type
+
+=cut
+
+sub pkg_type { $_[0]->{type}; }
 
 1;
 __END__

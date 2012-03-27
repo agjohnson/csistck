@@ -2,12 +2,11 @@ use Test::More;
 use Test::Exception;
 use Csistck;
 
-plan tests => 5;
+plan tests => 4;
 
-ok(Csistck::Test::File->new('test', 'test')->has_repair());
-ok(Csistck::Test::Template->new('test', 'test')->has_repair());
-ok(Csistck::Test::Script->new('test')->has_repair());
-ok(Csistck::Test::Pkg->new('test')->has_repair());
-ok(Csistck::Test::Permission->new('test')->has_repair());
+ok(Csistck::Test::File->new('test', src=>'test')->can('repair'));
+ok(Csistck::Test::Template->new('test', src=>'test')->can('repair'));
+ok(Csistck::Test::Script->new('test')->can('repair'));
+ok(Csistck::Test::Pkg->new('test')->can('repair'));
 
 1;

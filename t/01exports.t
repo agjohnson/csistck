@@ -6,7 +6,6 @@ use Csistck;
 my @tests = qw/
     file
     template
-    permission
     script
     pkg
     noop

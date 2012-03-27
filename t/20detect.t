@@ -11,8 +11,8 @@ my $pkgref = {
     default => 'test'
 };
 
-is(Csistck::Test::Pkg::get_pkg($pkgref, 'dpkg'), 'test-server');
-is(Csistck::Test::Pkg::get_pkg($pkgref, 'emerge'), 'testd');
-is(Csistck::Test::Pkg::get_pkg($pkgref, 'pkg_info'), 'net-test');
-is(Csistck::Test::Pkg::get_pkg($pkgref, 'rpm'), 'test');
+is(Csistck::Test::Pkg->new($pkgref, type => 'dpkg')->pkg_name, 'test-server');
+is(Csistck::Test::Pkg->new($pkgref, type => 'emerge')->pkg_name, 'testd');
+is(Csistck::Test::Pkg->new($pkgref, type => 'pkg_info')->pkg_name, 'net-test');
+is(Csistck::Test::Pkg->new($pkgref, type => 'rpm')->pkg_name, 'test');
 
