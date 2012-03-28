@@ -6,21 +6,21 @@ use File::stat;
 
 plan tests => 5;
 
-# Make file and test array (due to glob)
 my $h = File::Temp->new();
 my $file = $h->filename;
 print $h "Test";
 chmod(oct('0666'), $file);
-my $perm = Csistck::Test::File->new($file, mode => '0660');
+
+my $t = Csistck::Test::Template->new($file, mode => '0660');
 
 # Get first test, make sure we are what we are
-isa_ok($perm, Csistck::Test);
-ok($perm->can('check'));
+isa_ok($t, Csistck::Test);
+ok($t->can('check'));
 
 # Expect check to fail first, as well as manual. Repair and final check should
 # succeed, throw in a manual check again to test Csistck::Test abstraction
-dies_ok(sub { $perm->check; }, "Manual check of mode" );
-ok($perm->execute('repair'), 'Testing repair operation');
-ok($perm->execute('check'), 'Testing file mode again');
+dies_ok(sub { $t->check; }, "Manual check of mode" );
+ok($t->execute('repair'), 'Testing repair operation');
+ok($t->execute('check'), 'Testing file mode again');
 
 1;

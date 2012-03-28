@@ -30,7 +30,7 @@ sub prompt {
     # Skip
     say("  N : Skip");
     push(@choices, 'n');
-    # DIff
+    # Diff
     if ($test->can('diff')) {
         say("  D : Diff");
         push(@choices, 'd');
