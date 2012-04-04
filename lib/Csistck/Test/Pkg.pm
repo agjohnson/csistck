@@ -86,11 +86,13 @@ Arch linux package management utility
 
 =cut 
 
-# Use the convenience function to normalize args
 sub pkg {
     my ($pkg, $args) = @_;
-    my $t_args = (ref($args) eq "HASH") ? $args : { type => $args };
-    Csistck::Test::Pkg->new($pkg, $t_args);
+    # TODO detect assoc array
+    # If args is a hashref, deref and turn into an array, Csistck::Test
+    # processes arguments as named arguments -- an assoc array.
+    my $t_args = (ref($args) eq "HASH") ? [%{$args}] : [ 'type', $args ];
+    Csistck::Test::Pkg->new($pkg, @{$t_args});
 }
 
 sub new {

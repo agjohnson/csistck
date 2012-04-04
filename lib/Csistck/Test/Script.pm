@@ -19,8 +19,15 @@ use constant MODE_REPAIR => 'run';
 
 # Use the convenience function to normalize args
 sub script {
-    my ($script, $args) = @_;
-    Csistck::Test::Script->new($script, args => $args);
+    my $script = shift;
+    my $args = shift // [];
+    # TODO type check more
+    my $t_args = (ref($args) eq "ARRAY") ?
+        { args => $args },
+        { args => [$args] };
+    # Csistck::Test expects named arguments, an assoc array, deref hashref into
+    # an array and pass
+    Csistck::Test::Script->new($script, @{[%{$args}]});
 }
 
 sub script_name { $_[0]->{target}; }
@@ -34,7 +41,8 @@ sub process {
     my $self = shift;
     my $mode = shift;
     my $script = $self->script_name;
-    my @args = $self->args;
+    # Args was passed as arrayref
+    my @args = @{$self->args};
 
     # TODO sanity check on script
 
