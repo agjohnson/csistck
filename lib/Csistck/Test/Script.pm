@@ -23,7 +23,7 @@ sub script {
     my $args = shift // [];
     # TODO type check more
     my $t_args = (ref($args) eq "ARRAY") ?
-        { args => $args },
+        { args => $args } :
         { args => [$args] };
     # Csistck::Test expects named arguments, an assoc array, deref hashref into
     # an array and pass
@@ -34,6 +34,7 @@ sub script_name { $_[0]->{target}; }
 sub args { $_[0]->{args}; }
 
 # Wrap common process function
+sub desc { return sprintf("Script test for %s", $_[0]->script_name); }
 sub check { $_[0]->process(MODE_CHECK); }
 sub repair { $_[0]->process(MODE_REPAIR); }
 
