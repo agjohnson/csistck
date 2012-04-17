@@ -106,7 +106,7 @@ sub new {
     if (! $type) {
         $type = option('pkg_type') // detect_pkg_manager();
     }
-    die("Bad package manager: manager=<$type>")
+    die("Unsupported package manager or OS: manager=<none>")
       if (! $type);
     die("Package manager not supported: type=<$type>")
       if (! $Cmds->{$type});

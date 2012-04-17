@@ -14,14 +14,15 @@ lib/Csistck/Role.pm
 lib/Csistck/Term.pm
 lib/Csistck/Test.pm
 lib/Csistck/Test/File.pm
+lib/Csistck/Test/FileBase.pm
 lib/Csistck/Test/NOOP.pm
-lib/Csistck/Test/Permission.pm
 lib/Csistck/Test/Pkg.pm
 lib/Csistck/Test/Script.pm
+lib/Csistck/Test/Script.pm.rej
 lib/Csistck/Test/Template.pm
 lib/Csistck/Util.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 META.yml
 README.textile
 t/00load.t
@@ -31,8 +32,9 @@ t/02check.t
 t/02hosts.t
 t/02options.t
 t/02roles.t
+t/02tests.t
 t/20detect.t
 t/20permission.t
 t/20role.t
+t/20template.t
 t/50bug11.t
-t/50bug14.t

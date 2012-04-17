@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.09_03';
+our $VERSION = '0.09_06';
 
 # We export function in the main namespace
 use base 'Exporter';

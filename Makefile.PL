@@ -8,7 +8,7 @@ perl_version '5.010';
 
 version_from 'lib/Csistck.pm';
 license_from 'lib/Csistck.pm';
-author_from 'lib/Csistck.pm';
+author 'Anthony Johnson <aj@ohess.org>';
 
 homepage 'http://ohess.org/projects/csistck';
 bugtracker 'http://github.com/agjohnson/csistck/issues';
