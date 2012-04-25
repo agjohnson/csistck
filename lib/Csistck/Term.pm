@@ -42,16 +42,20 @@ sub prompt {
     say($action); 
     ReadMode 0;
     
+    # Execute and return, based on input. Return value is used for processing
+    # on_repair operations.
     given ($action) {
         when (/[Yy\n]/) { 
-            $test->execute('repair') if ($test->can('repair'));
+            return $test->execute('repair') if ($test->can('repair'));
         }
         when (/[Dd]/) { 
             # Show diff, loop through prompt again
             $test->execute('diff') if ($test->can('diff'));
             prompt($test);
         }
-        default {}
+        default {
+            return 0;
+        }
     }
 }
 

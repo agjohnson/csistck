@@ -14,12 +14,18 @@ sub new {
     bless {
         desc => "Unidentified test",
         target => $target,
+        on_repair => undef,
         @_
     }, $class;
 }
 
 sub desc { $_[0]->{desc}; }
 sub target { $_[0]->{target}; }
+
+sub on_repair { 
+    my $func = $_[0]->{on_repair};
+    return $func if (ref $func eq 'CODE');
+}
 
 # This is used to wrap processes
 sub execute {

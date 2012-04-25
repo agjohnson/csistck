@@ -18,7 +18,6 @@ lib/Csistck/Test/FileBase.pm
 lib/Csistck/Test/NOOP.pm
 lib/Csistck/Test/Pkg.pm
 lib/Csistck/Test/Script.pm
-lib/Csistck/Test/Script.pm.rej
 lib/Csistck/Test/Template.pm
 lib/Csistck/Util.pm
 Makefile.PL

@@ -4,7 +4,7 @@ use 5.010;
 use strict;
 use warnings;
 
-our $VERSION = '0.09_06';
+our $VERSION = '0.09_07';
 
 # We export function in the main namespace
 use base 'Exporter';
@@ -197,12 +197,17 @@ sub process {
         default {
             if (blessed($obj) and $obj->isa('Csistck::Test')) {
                 # Check is mandatory, if auto repair is set, repair, otherwise prompt
-                if (!$obj->execute('check')) {
-                    if (Csistck::Oper::repair()) {
-                        $obj->execute('repair');
+                return if $obj->execute('check');
+                if (Csistck::Oper::repair()) {
+                    my $pass = $obj->execute('repair');
+                    if ($pass and $obj->on_repair) {
+                        &{$obj->on_repair};
                     }
-                    else {
-                        Csistck::Term::prompt($obj);
+                }
+                else {
+                    my $pass = Csistck::Term::prompt($obj);
+                    if ($pass and $obj->on_repair) {
+                        &{$obj->on_repair};
                     }
                 }
             }
