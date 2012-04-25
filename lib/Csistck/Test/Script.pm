@@ -27,7 +27,7 @@ sub script {
         { args => [$args] };
     # Csistck::Test expects named arguments, an assoc array, deref hashref into
     # an array and pass
-    Csistck::Test::Script->new($script, @{[%{$args}]});
+    Csistck::Test::Script->new($script, @{[%{$t_args}]});
 }
 
 sub script_name { $_[0]->{target}; }
