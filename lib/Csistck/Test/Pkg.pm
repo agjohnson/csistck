@@ -87,12 +87,13 @@ Arch linux package management utility
 =cut 
 
 sub pkg {
-    my ($pkg, $args) = @_;
-    # TODO detect assoc array
-    # If args is a hashref, deref and turn into an array, Csistck::Test
-    # processes arguments as named arguments -- an assoc array.
-    my $t_args = (ref($args) eq "HASH") ? [%{$args}] : [ 'type', $args ];
-    Csistck::Test::Pkg->new($pkg, @{$t_args});
+    my $pkg = shift;
+    my $type = shift // undef;
+    my %args = (
+        type => $type,
+        @_
+    );
+    Csistck::Test::Pkg->new($pkg, %args);
 }
 
 sub new {
