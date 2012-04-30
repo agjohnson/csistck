@@ -6,6 +6,7 @@ use warnings;
 
 use base 'Csistck::Test';
 use Csistck::Oper;
+use Csistck::Test::Return;
 
 our @EXPORT_OK = qw/noop/;
 
@@ -13,7 +14,14 @@ sub noop { Csistck::Test::NOOP->new(@_); };
 
 sub check {
     my $self = shift;
-    die("Set to failure") unless ($self->target);
+
+    return Csistck::Test::Return->new(
+        desc => 'NOOP test',
+        msg => ($self->target) ?
+            'Set to pass' :
+            'Set to fail',
+        resp => ($self->target)
+    );
 }
 
 1;

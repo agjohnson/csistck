@@ -172,10 +172,10 @@ sub check {
     if (!defined(reftype($target))) {
         die ("What's this, \"${target}\"? That host is bupkis.")
           unless (defined $Hosts->{$target});
-        process($Hosts->{$target});
+        return process($Hosts->{$target});
     }
     else {
-        process($target);
+        return process($target);
     }
 }
 
@@ -188,31 +188,34 @@ sub process {
 
     given (ref $obj) {
         when ('ARRAY') {
-            map(process($_), @{$obj});
-            # TODO parse return for repair return
+            return map(process($_), @{$obj});
         }
         when ('CODE') {
-            &{$obj};
+            return &{$obj};
         }
         default {
             if (blessed($obj) and $obj->isa('Csistck::Test')) {
                 # Check is mandatory, if auto repair is set, repair, otherwise prompt
-                return if $obj->execute('check');
+                my $check = $obj->execute('check');
+                return if ($check->passed);
+                
                 if (Csistck::Oper::repair()) {
-                    my $pass = $obj->execute('repair');
-                    if ($pass and $obj->on_repair) {
+                    my $repair = $obj->execute('repair');
+                    if ($repair->passed and $obj->on_repair) {
                         &{$obj->on_repair};
                     }
+                    return $repair;
                 }
                 else {
-                    my $pass = Csistck::Term::prompt($obj);
-                    if ($pass and $obj->on_repair) {
+                    my $repair = Csistck::Term::prompt($obj);
+                    if ($repair->passed and $obj->on_repair) {
                         &{$obj->on_repair};
                     }
+                    return $repair;
                 }
             }
             elsif (blessed($obj) and $obj->isa('Csistck::Role')) {
-                process($obj->get_tests);
+                return process($obj->get_tests);
             }
             else {
                 die(sprintf("Unkown object reference: ref=<%s>", ref $obj));

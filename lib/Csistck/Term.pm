@@ -8,6 +8,7 @@ use base 'Exporter';
 
 use Term::ReadKey;
 use Csistck::Test;
+use Csistck::Test::Return;
 
 our @EXPORT_OK = qw/
     prompt
@@ -51,10 +52,14 @@ sub prompt {
         when (/[Dd]/) { 
             # Show diff, loop through prompt again
             $test->execute('diff') if ($test->can('diff'));
-            prompt($test);
+            return prompt($test);
         }
         default {
-            return 0;
+            return Csistck::Test::Return->new(
+                resp => 0,
+                msg => 'Missing function',
+                desc => $test->desc
+            );
         }
     }
 }
