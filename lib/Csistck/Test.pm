@@ -61,7 +61,12 @@ sub execute {
     
     # Return should be an object from now on. If not blessed, assume ret value
     if (blessed($ret) and $ret->isa('Csistck::Test::Return')) {
-        Csistck::Oper::info($ret->msg);
+        if ($ret->resp) {
+            Csistck::Oper::info($ret->msg);
+        }
+        else {
+            Csistck::Oper::error($ret->msg);
+        }
         return $ret;
     }
     else {
