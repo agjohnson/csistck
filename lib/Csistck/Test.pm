@@ -22,11 +22,11 @@ sub new {
     }, $class;
 }
 
-sub desc { $_[0]->{desc}; }
-sub target { $_[0]->{target}; }
+sub desc { shift->{desc}; }
+sub target { shift->{target}; }
 
 sub on_repair { 
-    my $func = $_[0]->{on_repair};
+    my $func = shift->{on_repair};
     return $func if (ref $func eq 'CODE');
 }
 

@@ -11,7 +11,7 @@ my $file = $h->filename;
 print $h "Test";
 chmod(oct('0666'), $file);
 
-my $t = template($file, mode => '0660');
+my $t = file($file, mode => '0660');
 
 isa_ok($t, Csistck::Test);
 ok($t->can('check'), 'Has check');
