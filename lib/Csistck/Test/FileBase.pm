@@ -37,8 +37,8 @@ sub check {
     $ret &= $self->uid_process(\&uid_check);
     $ret &= $self->gid_process(\&gid_check);
 
-    return ($ret) ? $self->pass('File matches') :
-      $self->fail("File doesn't match");
+    return (($ret == 1) ? $self->pass('File matches') :
+      $self->fail("File doesn't match"));
 }
 
 sub repair {
@@ -61,8 +61,8 @@ sub repair {
     $ret &= $self->uid_process(\&uid_repair);
     $ret &= $self->gid_process(\&gid_repair);
     
-    return ($ret) ? $self->pass('File matches') :
-      $self->fail("File doesn't match");
+    return (($ret == 1) ? $self->pass('File repaired') :
+      $self->fail('File not repaired'));
 }
 
 # Diff for files

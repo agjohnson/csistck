@@ -30,13 +30,13 @@ sub script {
     Csistck::Test::Script->new($script, %args);
 }
 
-sub script_name { $_[0]->{target}; }
-sub args { $_[0]->{args}; }
+sub script_name { shift->{target}; }
+sub args { shift->{args}; }
 
 # Wrap common process function
-sub desc { return sprintf("Script test for %s", $_[0]->script_name); }
-sub check { $_[0]->process(MODE_CHECK); }
-sub repair { $_[0]->process(MODE_REPAIR); }
+sub desc { return sprintf("Script test for %s", shift->script_name); }
+sub check { shift->process(MODE_CHECK); }
+sub repair { shift->process(MODE_REPAIR); }
 
 sub process {
     my $self = shift;
@@ -49,15 +49,12 @@ sub process {
 
     # Build command
     my @command = ($script, $mode, @args);
-    
     debug(sprintf("Run command: cmd=<%s>", join(" ", @command)));
-    
-    # my $ret = system("$cmd 1>/dev/null 2>/dev/null");
     chdir($FindBin::Bin);
     my $ret = system(@command);
-
-    die("Command returned $ret")
-      unless($ret == 0);
+    
+    return (($ret == 0) ? $self->pass('Command passed') :
+      $self->fail('Command failed'));
 }
 
 1;
