@@ -17,6 +17,7 @@ lib/Csistck/Test/File.pm
 lib/Csistck/Test/FileBase.pm
 lib/Csistck/Test/NOOP.pm
 lib/Csistck/Test/Pkg.pm
+lib/Csistck/Test/Return.pm
 lib/Csistck/Test/Script.pm
 lib/Csistck/Test/Template.pm
 lib/Csistck/Util.pm
@@ -29,11 +30,16 @@ t/01exports.t
 t/01friday.t
 t/02check.t
 t/02hosts.t
+t/02on_repair.t
 t/02options.t
+t/02process.t
 t/02roles.t
 t/02tests.t
 t/20detect.t
+t/20file.t
 t/20permission.t
+t/20pkg.t
 t/20role.t
+t/20script.t
 t/20template.t
 t/50bug11.t

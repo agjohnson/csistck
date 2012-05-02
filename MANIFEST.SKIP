@@ -6,3 +6,5 @@ MYMETA
 ^MANIFEST\.
 .bak$
 ^Csistck.*.tar.gz$
+^eg/
+^env/
