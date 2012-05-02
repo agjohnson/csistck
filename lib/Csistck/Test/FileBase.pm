@@ -15,36 +15,36 @@ use FindBin;
 use File::stat;
 use Sys::Hostname::Long qw//;
 
-sub desc { sprintf("File check on %s", $_[0]->{target}); }
-sub dest { $_[0]->{target}; }
-sub src { $_[0]->{src}; }
-sub mode { $_[0]->{mode}; }
-sub uid { $_[0]->{uid}; }
-sub gid { $_[0]->{gid}; }
+sub desc { sprintf("File check on %s", shift->{target}); }
+sub dest { shift->{target}; }
+sub src { shift->{src}; }
+sub mode { shift->{mode}; }
+sub uid { shift->{uid}; }
+sub gid { shift->{gid}; }
 
 sub check {
     my $self = shift;
+    my $ret = 1;
 
     die("Destination path not found")
       if (! -e $self->dest);
     
     # If we defined a source file
     if (defined($self->src) and $self->can('file_check')) {
-        $self->file_check;
+        $ret &= $self->file_check;
     }
-    
-    # Wrap check functions with common sanity test
-    $self->mode_process(\&mode_check)
-      if (defined $self->mode);
-    $self->uid_process(\&uid_check)
-      if (defined $self->uid);
-    $self->gid_process(\&gid_check)
-      if (defined $self->gid);
+    $ret &= $self->mode_process(\&mode_check);
+    $ret &= $self->uid_process(\&uid_check);
+    $ret &= $self->gid_process(\&gid_check);
+
+    return ($ret) ? $self->pass('File matches') :
+      $self->fail("File doesn't match");
 }
 
 sub repair {
     my $self = shift;
-    
+    my $ret = 1;
+
     # If we defined a source file
     if (defined($self->src) and $self->can('file_repair')) {
         if (-e $self->dest) {
@@ -55,16 +55,14 @@ sub repair {
             backup_file($self->dest);
         }
         
-        $self->file_repair;
+        $ret &= $self->file_repair;
     }
+    $ret &= $self->mode_process(\&mode_repair);
+    $ret &= $self->uid_process(\&uid_repair);
+    $ret &= $self->gid_process(\&gid_repair);
     
-    # Wrap check functions with common sanity test
-    $self->mode_process(\&mode_repair)
-      if (defined $self->mode);
-    $self->uid_process(\&uid_repair)
-      if (defined $self->uid);
-    $self->gid_process(\&gid_repair)
-      if (defined $self->gid);
+    return ($ret) ? $self->pass('File matches') :
+      $self->fail("File doesn't match");
 }
 
 # Diff for files
@@ -83,27 +81,37 @@ sub diff {
 }
 
 # Wrapper functions to perform sanity tests on arguments
+# Return pass if arguments are missing, die if invalid
 sub mode_process {
     my ($self, $func) = @_;
+
+    return 1 unless($self->mode);
     my $mode = $self->mode;
     die("Invalid file mode")
       if ($mode !~ m/^[0-7]{3,4}$/);
     $mode =~ s/^([0-7]{3})$/0$1/;
     $self->{mode} = $mode;
+    
     &{$func}($self->dest, $self->mode);
 }
 
 sub uid_process {
     my ($self, $func) = @_;
+
+    return 1 unless ($self->uid);
     die("Invalid user id")
       if ($self->uid !~ m/^[0-9]+$/);
+    
     &{$func}($self->dest, $self->uid);
 }
 
 sub gid_process {
     my ($self, $func) = @_;
+
+    return 1 unless ($self->gid);
     die("Invalid group id")
       if ($self->gid !~ m/^[0-9]+$/);
+
     &{$func}($self->dest, $self->gid);
 }
 
@@ -116,49 +124,48 @@ sub mode_check {
         debug("File mode: file=<$file> mode=<$curmode>");
         return 1 if ($curmode eq $mode);
     }
-    die("Permission check failed: $file");
 }
 
 sub mode_repair {
     my ($file, $mode) = @_;
     debug("Chmod file: file=<$file> mode=<$mode>");
-    chmod(oct($mode), $file) or die("Failed to chmod file: $file");
+    chmod(oct($mode), $file);
 }
 
 # UID operations
 sub uid_check {
     my ($file, $uid) = @_;
     my $fh = stat($file);
+    my $curuid = undef;
     if ($fh) {
         my $curuid = $fh->uid;
         debug("File owner: file=<$file> uid=<$uid>");
-        return if ($curuid == $uid);
     }
-    die("File ownership check failed: $file");
+    return ($curuid == $uid);
 }
 
 sub uid_repair {
     my ($file, $uid) = @_;
     debug("Chown file: file=<$file> uid=<$uid>");
-    chown($uid, -1, $file) or die("Failed to chown file: $file");
+    chown($uid, -1, $file);
 }
 
 # GID operations
 sub gid_check {
     my ($file, $gid) = @_;
     my $fh = stat($file);
+    my $curgid = undef;
     if ($fh) {
-        my $curgid = $fh->gid;
+        $curgid = $fh->gid;
         debug("File group: file=<$file> gid=<$gid>");
-        return if ($curgid == $gid);
     }
-    die("File group ownership failed: $file");
+    return ($curgid == $gid);
 }
 
 sub gid_repair {
     my ($file, $gid) = @_;
     debug("Chown file: file=<$file> gid=<$gid>");
-    chown(-1, $gid, $file) or die("Failed to chown file: $file");
+    chown(-1, $gid, $file);
 }
 
 # Compare hashes between two files

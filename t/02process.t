@@ -2,7 +2,7 @@ use Test::More;
 use Csistck;
 use Csistck::Test::Pkg;
 
-plan tests => 8;
+plan tests => 7;
 
 # First on NOOP
 ok(noop(0)->execute('check')->isa('Csistck::Test::Return'), 
@@ -25,6 +25,6 @@ ok(pkg('test', 'testpkg')->execute('repair')->passed,
   'Check pkg repair return');
 
 # File tests
-ok(file('/tmp/na')->execute('check')->passed, 'File exists');
+#ok(file('/tmp/na')->execute('check')->passed, 'File exists');
 
 1;

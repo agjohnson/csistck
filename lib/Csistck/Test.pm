@@ -55,13 +55,13 @@ sub execute {
     if ($@) {
         my $error = $@;
         $error =~ s/ at [A-Za-z0-9\/\_\-\.]+ line [0-9]+.\n//;
-        # TODO move error display
-        # Csistck::Oper::error(sprintf("%s: %s", $self->desc, $error));
+        Csistck::Oper::error(sprintf("%s: %s", $self->desc, $error));
         return $self->fail($error);
     }
     
     # Return should be an object from now on. If not blessed, assume ret value
     if (blessed($ret) and $ret->isa('Csistck::Test::Return')) {
+        Csistck::Oper::info($ret->msg);
         return $ret;
     }
     else {

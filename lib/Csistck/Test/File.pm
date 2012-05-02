@@ -21,32 +21,24 @@ use Text::Diff ();
 
 sub file { Csistck::Test::File->new(@_); };
 
-sub desc { sprintf("File check on %s", $_[0]->dest); }
+sub desc { sprintf("File check on %s", shift->dest); }
 
 sub file_check {
     my $self = shift;
-    my $dest = $self->dest;
-    my $src = $self->src;
-    
-    die("Files do not match: src=<$src> dest=<$dest>")
-      unless(file_compare($src, $dest));
+    my ($dest, $src) = ($self->dest, $self->src);
+    file_compare($src, $dest);
 }
 
 sub file_repair {
     my $self = shift;
-    my $dest = $self->dest;
-    my $src = $self->src;
-    
+    my ($dest, $src) = ($self->dest, $self->src);
     debug("Copying file: <src=$src> <dest=$dest>");
-    copy($src, $dest) or 
-      die("Failed to copy file: $!: src=<$src> dest=<$dest>");
+    copy($src, $dest);
 }
     
 sub file_diff {
     my $self = shift;
-    my $dest = $self->dest;
-    my $src = $self->src;
-    
+    my ($dest, $src) = ($self->dest, $self->src);
     say(Text::Diff::diff($dest, $src));
 }
 

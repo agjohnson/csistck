@@ -4,7 +4,7 @@ use Csistck;
 use File::Temp;
 use File::stat;
 
-plan tests => 5;
+plan tests => 6;
 
 my $h = File::Temp->new();
 my $file = $h->filename;
@@ -19,8 +19,9 @@ ok($t->can('check'));
 
 # Expect check to fail first, as well as manual. Repair and final check should
 # succeed, throw in a manual check again to test Csistck::Test abstraction
-dies_ok(sub { $t->check; }, "Manual check of mode" );
-ok($t->execute('repair'), 'Testing repair operation');
-ok($t->execute('check'), 'Testing file mode again');
+ok($t->check, "Manual check of mode" );
+isa_ok($t->check, Csistck::Test::Return, "Manual check return" );
+ok($t->execute('repair')->passed, 'Testing repair operation');
+ok($t->execute('check')->passed, 'Testing file mode again');
 
 1;

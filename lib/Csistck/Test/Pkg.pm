@@ -107,9 +107,9 @@ sub new {
     if (! $type) {
         $type = option('pkg_type') // detect_pkg_manager();
     }
-    die("Unsupported package manager or OS: manager=<none>")
+    return $self->fail("Unsupported package manager or OS: manager=<none>")
       if (! $type);
-    die("Package manager not supported: type=<$type>")
+    return $self->fail("Package manager not supported: type=<$type>")
       if (! $Cmds->{$type});
     $self->{type} = $type;
 
@@ -126,13 +126,15 @@ sub check {
     my $pkg = $self->pkg_name;
     my $type = $self->pkg_type;
     my $cmd = sprintf($Cmds->{$type}->{check}, $pkg) or
-      die("Package check command missing: type=<$type>");
+      return $self->fail("Package check command missing: type=<$type>");
 
     debug("Searching for package via command: cmd=<$cmd>");    
     my $ret = system("$cmd 1>/dev/null 2>/dev/null");
 
-    die("Package missing")
+    return $self->fail("Package missing")
       unless($ret == 0);
+
+    return $self->pass("Package installed");
 }
 
 sub repair {
@@ -145,15 +147,17 @@ sub repair {
         $cmd = sprintf($Cmds->{$type}->{install}, $pkg);
     }
     else {
-        die("Package install command missing: type=<$type>");
+        return $self->fail("Package install command missing: type=<$type>");
     }
 
     $ENV{DEBIAN_FRONTEND} = "noninteractive";
     debug("Installing package via command: cmd=<$cmd>");
     my $ret = system("$cmd 1>/dev/null 2>/dev/null");
 
-    die("Package installation failed")
+    return $self->fail("Package installation failed")
       unless ($ret == 0);
+    
+    return $self->pass("Package installation successful");
 }
 
 # Package diff
@@ -167,14 +171,14 @@ sub diff {
         $cmd = sprintf($Cmds->{$type}->{diff}, $pkg);
     }
     else {
-        die("Package diff command missing: type=<$type>");
+        return $self->fail("Package diff command missing: type=<$type>");
     }
     
     $ENV{DEBIAN_FRONTEND} = "noninteractive";
     debug("Showing package differences via command: cmd=<$cmd>");
     my $ret = system("$cmd 2>/dev/null");
 
-    die("Package differences query failed")
+    return $self->fail("Package differences query failed")
       unless ($ret == 0);
 }
 

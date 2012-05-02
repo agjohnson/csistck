@@ -18,7 +18,7 @@ use Text::Diff ();
 
 sub template { Csistck::Test::Template->new(@_); };
 
-sub desc { sprintf("Template check for destination %s", $_[0]->dest); }
+sub desc { sprintf("Template check for destination %s", shift->dest); }
 
 sub file_check {
     my $self = shift;
@@ -30,8 +30,7 @@ sub file_check {
     my $hashsrc = hash_string($tplout);
     my $hashdst = hash_file($self->dest);
     
-    die("Template output does not match destination")
-      unless(defined $hashsrc and defined $hashdst and ($hashsrc eq $hashdst));
+    return (defined $hashsrc and defined $hashdst and ($hashsrc eq $hashdst));
 }
 
 sub file_repair {
@@ -39,10 +38,11 @@ sub file_repair {
     debug(sprintf("Output template: template=<%s> dest=<%s>",
       $self->src, $self->dest));
     # TODO tmp file for template
-    open(my $h, '>', $self->dest) 
+    open(my $h, '>', $self->dest)
       or die("Permission denied writing template");
     $self->template_file($h);
     close($h);
+    return 1;
 }
 
 sub file_diff {
@@ -80,7 +80,6 @@ sub template_file {
 # TODO error checking
 sub get_absolute_template {
     my $template = shift;
-
     return join "/", $FindBin::Bin, $template;
 }
 
