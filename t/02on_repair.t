@@ -12,7 +12,7 @@ $t = file('dummy', on_repair => sub { });
 ok((ref $t->on_repair eq 'CODE'), 'File on_repair');
 $t = template('dummy', on_repair => sub { });
 ok((ref $t->on_repair eq 'CODE'), 'Template on_repair');
-$t = pkg('dummy', undef, on_repair => sub { });
+$t = pkg('dummy', 'dpkg', on_repair => sub { });
 ok((ref $t->on_repair eq 'CODE'), 'Pkg on_repair');
 
 1;
