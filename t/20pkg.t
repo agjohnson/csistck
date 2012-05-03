@@ -3,18 +3,29 @@ use Test::Exception;
 use Csistck;
 use Csistck::Test::Pkg;
 
-plan tests => 13;
+# Find target for script
+my $cmdpass = pop [ grep { -e -x $_ }
+  @{['/bin/true', '/usr/bin/true']} ];
+my $cmdfail = pop [ grep { -e -x $_ }
+  @{['/bin/false', '/usr/bin/false']} ];
+
+if ($cmdpass and $cmdfail) {
+    plan tests => 13;
+}
+else {
+    plan skip_all => "OS unsupported";
+}
 
 # Pkg tests
 $Csistck::Test::Pkg::Cmds->{testpass} = {
-    check => '/bin/true',
-    diff => '/bin/true',
-    install => '/bin/true'
+    check => $cmdpass,
+    diff => $cmdpass,
+    install => $cmdpass
 };
 $Csistck::Test::Pkg::Cmds->{testfail} = {
-    check => '/bin/false',
-    diff => '/bin/false',
-    install => '/bin/false'
+    check => $cmdfail,
+    diff => $cmdfail,
+    install => $cmdfail
 };
 
 my $t = pkg('test', 'testpass');

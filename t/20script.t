@@ -4,10 +4,21 @@ use Csistck;
 use File::Temp;
 use File::stat;
 
-plan tests => 10;
+# Find target for script
+my $cmdpass = pop [ grep { -e -x $_ }
+  @{['/bin/true', '/usr/bin/true']} ];
+my $cmdfail = pop [ grep { -e -x $_ }
+  @{['/bin/false', '/usr/bin/false']} ];
+
+if ($cmdpass and $cmdfail) {
+    plan tests => 10;
+}
+else {
+    plan skip_all => "OS unsupported";
+}
 
 # Passing test
-my $t = script('/bin/true');
+my $t = script($cmdpass);
 isa_ok($t, Csistck::Test);
 ok($t->can('check'));
 ok($t->check, "Manual check" );
@@ -18,7 +29,7 @@ is($t->execute('check')->passed, 1, 'Full check');
 is($t->execute('repair')->passed, 1, 'Full repair');
 
 # Failing test
-$t = script('/bin/false');
+$t = script($cmdfail);
 is($t->execute('check')->failed, 1, 'Full check on failing');
 is($t->execute('repair')->failed, 1, 'Full repair on failing');
 
