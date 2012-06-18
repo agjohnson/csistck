@@ -64,7 +64,7 @@ Csistck::Test::File - Csistck file check
 
 =head1 METHODS
 
-=head2 file($target, :$src, :$mode, :$uid, :$gid)
+=head2 file($target, :$src, :$mode, :$uid, :$gid, :\&on_repair)
 
 Copy file C<$src> to C<$target>, setting additional options with named
 arguments such as mode and uid.
