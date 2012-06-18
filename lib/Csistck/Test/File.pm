@@ -96,6 +96,10 @@ Change target UID to the specified integer value.
 
 Change target GID to the specified integer value.
 
+=item B<on_repair>
+
+If a repair operation is run, this coderef is called by the process method.
+
 =back
 
 =head1 AUTHOR

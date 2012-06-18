@@ -68,7 +68,7 @@ Csistck::Test::Script - Csistck script check
 
 =head1 METHODS
 
-=head2 script($script, [@args])
+=head2 script($script, \@args, :\&on_repair)
 
 Call script with extra arguments, if supplied. The first argument passed to
 the script is the run mode, C<MODE_CHECK> or C<MODE_RUN>.
@@ -79,6 +79,8 @@ When processed, the code above, in check mode for example, the process spawned
 would be:
 
     /path/to/script/apache2/mod-check check rewrite
+
+If a repair operation is run, the on_repair function is called.
 
 =head1 CONSTANTS
 

@@ -50,7 +50,7 @@ Csistck::Test::Pkg - Csistck package check
 
 =head1 METHODS
 
-=head2 pkg($package, [$type])
+=head2 pkg($package, $type, :\&on_repair)
 
 Test for existing package using forks to system package managers. Package can be
 specified as a string, or as a hashref:
@@ -67,6 +67,8 @@ name to check. If a default key is provided, that package is used by default.
 
 In repair mode, install the package quietly, unless package manager doesn't
 handle automating install.
+
+If a repair operation is run, the on_repair function is called
 
 Supported package managers:
 

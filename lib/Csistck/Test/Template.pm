@@ -94,7 +94,7 @@ Csistck::Test::Template - Csistck template check
 
 =head1 METHODS
 
-=head2 template($target, :$src, :$uid, :$gid, [:ARGS])
+=head2 template($target, :$src, :$uid, :$gid, :$on_repair, [:ARGS])
 
 Process file C<$src> as a Template Toolkit template, output to path C<$target>.
 Optional named arguments can be used to alter the mode, uid, etc. All parameters
@@ -132,6 +132,10 @@ Change target UID to the specified integer value.
 =item B<gid>
 
 Change target GID to the specified integer value.
+
+=item B<on_repair>
+
+If a repair operation is run, this coderef is called by the process method.
 
 =back
 
