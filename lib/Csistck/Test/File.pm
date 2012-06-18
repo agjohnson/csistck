@@ -58,26 +58,43 @@ __END__
 
 =head1 NAME
 
-Csistck::Test::Template - Csistck template check
+Csistck::Test::File - Csistck file check
 
 =head1 DESCRIPTION
 
 =head1 METHODS
 
-=head2 template($template, $target, [%args])
+=head2 file($target, :$src, :$mode, :$uid, :$gid)
 
-Process template toolkit file and output to target path. Target
-path should be a file in an existing path. 
+Copy file C<$src> to C<$target>, setting additional options with named
+arguments such as mode and uid.
 
-    role 'test' => template('sys/motd.tt', '/etc/motd', { production => 1 });
+    role 'test' => file(
+        '/etc/lighttpd/lighttpd.conf',
+        src => 'lighttpd/lighttpd.conf',
+        mode => '0644'
+    );
 
-Some arguments are automatically passed to the template processor:
+This method takes the following named parameters:
 
 =over
 
-=item hostname
+=item B<src>
 
-The full hostname of the current system
+Source file for copying
+
+=item B<mode>
+
+Change target file mode. This should be a string representation of the octal
+mode of the target file -- eg. '0644'
+
+=item B<uid>
+
+Change target UID to the specified integer value.
+
+=item B<gid>
+
+Change target GID to the specified integer value.
 
 =back
 
@@ -87,7 +104,7 @@ Anthony Johnson, E<lt>anthony@ohess.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2011 Anthony Johnson
+Copyright (c) 2011-2012 Anthony Johnson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -108,5 +125,3 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 =cut
-
-

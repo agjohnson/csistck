@@ -50,19 +50,36 @@ Csistck - Perl system consistency check framework
 
     use Csistck;
     
-    for my $host (qw/a b/) {
-        host $host => role('test');
+    sub sig_hup_mysql { $ENV{'MAINT_HUP_MYSQL'} = 1; }
+
+    for (qw/a b/) {
+        host "$_.example.com" => role('mysql');
     }
 
-    host 'c' => role('test');
+    host 'c' => role('mysql');
     
-    role 'test' => 
-        template(".files/test.tt", "/tmp/test", { text => "Some text here" }),
-        permission("/tmp/test*", mode => '0777', uid => 100, gid => 100);
-    
+    role 'mysql' => 
+        pkg({
+            dpkg => 'mysql-server',
+            emerge => 'mysql'
+        }),
+        template(
+            '/etc/mysql/my.cnf',
+            src => 'mysql/my.cnf', 
+            mysql => {
+                bind => '127.0.0.1',
+                keysize => '1G'
+            },
+            mode => '0644',
+            uid => 100,
+            gid => 100,
+            on_restart => \&sig_hup_mysql
+        ),
+        script('services.sh');
+            
     check;
 
-The script can then be called directly, using command line arguements below
+The script can then be called directly, using command line arguments below
 
 =head1 DESCRIPTION
 
@@ -89,7 +106,12 @@ method is to extend a new object from L<Csistck::Role>:
             dpkg => 'test-server',
             pkg_info => 'net-test'
         }),
-        template('files/example.conf', $self->{config}, { example => $self });
+        template(
+            $self->{config},
+            src => 'files/example.conf',
+            example => $self
+        );
+
     }
 
     1;
@@ -241,7 +263,7 @@ Set option to specified value.
 
 pkg_type [string]
 
-Set package type
+Set default package type
 
 =item *
 
@@ -253,7 +275,8 @@ Set default domain name to append to hosts
 
 =head2 host($hostname, [@tests]);
 
-Append test or array of tests to host definition.
+Append test or array of tests to host definition. Most examples use the fat
+comma delimiter syntax, however this is a subjective choice. 
 
     host 'hostname' => noop(1), noop(1);
     host 'hostname' => noop(0);
@@ -276,20 +299,35 @@ Returns a reference to the role object.
 
     role 'test' => noop(1);
 
-=head2 file($glob, $target)
+=head2 file($target, :$src, :$mode, :$uid, :$gid)
 
-Copy files matching file glob pattern to target directory. 
+Copy file C<$src> to C<$target>, setting additional options with named arguments 
+such as mode and uid.
 
-    role 'test' => file("lighttpd/app/*.conf", "/etc/lighttpd");
+    role 'test' => file(
+        '/etc/lighttpd/lighttpd.conf',
+        src => 'lighttpd/lighttpd.conf',
+        mode => '0644'
+    );
 
 See L<Csistck::Test::File>
 
-=head2 template($template, $target, [%args])
+=head2 template($target, :$src, :$mode, :$uid, :$gid, [:$args])
 
-Process file $template as a Template Toolkit template, output to path $target.
-Hashref %args is passed to the template processor.
+Process file C<$src> as a Template Toolkit template, output to path C<$target>.
+Optional named arguments can be used to alter the mode, uid, etc. All parameters
+passed into the C<Csistck::Test::Template> object are available in the actual
+template, so any additional named arguments are available in the template using
+the argument's name -- these arguments should be hasrefs.
 
-    role 'test' => template("sys/motd", "/etc/motd", { hot => 'dog' });
+    role 'test' => template(
+        '/etc/motd',
+        src => 'sys/motd',
+        foo => { bar => 1 },
+        uid => 0,
+        gid => 0,
+        mode => '0640'
+    );
 
 See L<Csistck::Test::Template>
 
@@ -315,7 +353,7 @@ See L<Csistck::Test::Script>
 
 =head2 pkg($package, [$type])
 
-Check for package using system package manager. The C<package> argument may be
+Check for package using system package manager. The C<$package> argument may be
 specified as a string, or as a hashref to specify package names for multiple
 package managers. The package manager will be automatically detected if no
 package manager is specified.
@@ -332,7 +370,7 @@ See L<Csistck::Test::Pkg> for more information
 
 =head1 SCRIPT USAGE
 
-Scripts based on csistck will run in an interactive mode by default. 
+Scripts based on Csistck will run in an interactive mode by default. 
 The following command line options are recognized in a csistck based script
 
 =over
