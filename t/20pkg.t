@@ -4,10 +4,10 @@ use Csistck;
 use Csistck::Test::Pkg;
 
 # Find target for script
-my $cmdpass = pop [ grep { -e -x $_ }
-  @{['/bin/true', '/usr/bin/true']} ];
-my $cmdfail = pop [ grep { -e -x $_ }
-  @{['/bin/false', '/usr/bin/false']} ];
+my $cmdpass = pop @{[ grep { -e -x $_ }
+  @{['/bin/true', '/usr/bin/true']} ]};
+my $cmdfail = pop @{[ grep { -e -x $_ }
+  @{['/bin/false', '/usr/bin/false']} ]};
 
 if ($cmdpass and $cmdfail) {
     plan tests => 13;
